@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicar — BANDEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>* { font-family: 'DM Sans', -apple-system, sans-serif; }</style>
+</head>
+<body class="bg-stone-100 text-gray-900 min-h-screen">
+
+    {% set active = "bandas" %}
+    {% include "_header.html" %}
+
+    <main class="max-w-lg mx-auto px-6 py-16">
+
+        <p class="text-xs text-gray-400 uppercase tracking-widest mb-2">Publicando como</p>
+        <h1 class="text-2xl font-bold tracking-tight mb-10">{{ user.display_name }}</h1>
+
+        <form method="post" action="/bandas/nuevo" class="space-y-4">
+            <input type="hidden" name="token" value="{{ token }}">
+
+            <textarea
+                name="content"
+                rows="5"
+                maxlength="500"
+                placeholder="¿Qué está pasando? Nuevo disco, fecha en vivo, buscamos sala de ensayo..."
+                required
+                class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gray-900 placeholder-gray-400 resize-none"
+            ></textarea>
+
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Máximo 500 caracteres</span>
+                <button type="submit" class="bg-gray-900 hover:bg-gray-700 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors">
+                    Publicar
+                </button>
+            </div>
+        </form>
+
+    </main>
+
+</body>
+</html>

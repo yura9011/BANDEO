@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Perfil - BANDEO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 min-h-screen">
+    
+    <!-- Header -->
+    <header class="border-b border-gray-200 py-6">
+        <div class="container mx-auto px-4">
+            <a href="/" class="text-2xl font-light tracking-wide hover:opacity-70">BANDEO</a>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-12 max-w-xl">
+        <h2 class="text-3xl font-light mb-2">Crear perfil</h2>
+        <p class="text-gray-500 mb-12">Completá tus datos para aparecer en las búsquedas</p>
+
+        <form action="/create" method="post" class="space-y-6">
+            <!-- Rol -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Tipo</label>
+                <select name="role" required class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+                    <option value="MUSICO">Músico</option>
+                    <option value="BANDA">Banda</option>
+                </select>
+            </div>
+
+            <!-- Nombre -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Nombre</label>
+                <input type="text" name="display_name" required placeholder="Juan Pérez" 
+                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+            </div>
+
+            <!-- Ciudad -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Ciudad</label>
+                <input type="text" name="city" required placeholder="Lanús" 
+                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+            </div>
+
+            <!-- Instrumentos -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Instrumentos</label>
+                <input type="text" name="instruments" required placeholder="Bajo, Guitarra" 
+                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+            </div>
+
+            <!-- Géneros -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Géneros</label>
+                <input type="text" name="genres" required placeholder="Rock, Blues" 
+                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+            </div>
+
+            <!-- Bio -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Bio (opcional)</label>
+                <textarea name="bio" rows="3" placeholder="Contá un poco sobre vos..." 
+                          class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900"></textarea>
+            </div>
+
+            <!-- Contacto -->
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">WhatsApp (opcional)</label>
+                <input type="text" name="phone" placeholder="1155667788" 
+                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-600 mb-2">Instagram (opcional)</label>
+                <input type="text" name="instagram_link" placeholder="@tuusuario" 
+                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+            </div>
+
+            <!-- Links opcionales (colapsados) -->
+            <details class="text-sm text-gray-600">
+                <summary class="cursor-pointer hover:text-gray-900">Más opciones</summary>
+                <div class="mt-4 space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-2">YouTube</label>
+                        <textarea name="youtube_links" rows="2" placeholder="https://youtube.com/watch?v=..." 
+                                  class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-2">Spotify</label>
+                        <input type="text" name="spotify_link" placeholder="https://open.spotify.com/artist/..." 
+                               class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+                    </div>
+                </div>
+            </details>
+
+            <button type="submit" class="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded transition-colors">
+                Crear perfil
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

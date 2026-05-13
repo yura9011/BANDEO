@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BANDEO — Músicos y bandas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+
+        /* ── TEMAS ─────────────────────────────────────────── */
+
+        /* Claro */
+        [data-theme="light"] { --bg: #F5F4F0; --header-bg: rgba(255,255,255,0.85); --header-border: #e5e7eb; --text: #111; --muted: #9ca3af; --btn-bg: #111; --btn-text: #fff; }
+        [data-theme="light"] .note-0 { background: #FEFCE8; }
+        [data-theme="light"] .note-1 { background: #F0FDF4; }
+        [data-theme="light"] .note-2 { background: #EFF6FF; }
+        [data-theme="light"] .note-3 { background: #FFF1F2; }
+        [data-theme="light"] .note-4 { background: #FFFFFF; }
+        [data-theme="light"] .note { box-shadow: 2px 4px 10px rgba(0,0,0,0.07); }
+        [data-theme="light"] .note:hover { box-shadow: 8px 16px 32px rgba(0,0,0,0.13); }
+        [data-theme="light"] .tag { background: rgba(0,0,0,0.08); color: #374151; }
+        [data-theme="light"] .note-text { color: #111; }
+        [data-theme="light"] .note-sub { color: #6b7280; }
+        [data-theme="light"] .note-border { border-color: rgba(0,0,0,0.06); }
+
+        /* Oscuro */
+        [data-theme="dark"] { --bg: #1a1814; --header-bg: rgba(26,24,20,0.9); --header-border: #2d2b26; --text: #e8e4dc; --muted: #6b6760; --btn-bg: #e8e4dc; --btn-text: #1a1814; }
+        [data-theme="dark"] .note-0 { background: #2d2416; } /* kraft oscuro   */
+        [data-theme="dark"] .note-1 { background: #1a2318; } /* verde musgo    */
+        [data-theme="dark"] .note-2 { background: #1e1f2e; } /* azul noche     */
+        [data-theme="dark"] .note-3 { background: #2a1a1a; } /* terracota      */
+        [data-theme="dark"] .note-4 { background: #222018; } /* sepia          */
+        [data-theme="dark"] .note { box-shadow: 2px 4px 14px rgba(0,0,0,0.4); }
+        [data-theme="dark"] .note:hover { box-shadow: 8px 16px 36px rgba(0,0,0,0.6); }
+        [data-theme="dark"] .tag { background: rgba(255,255,255,0.1); color: #c9c4b8; }
+        [data-theme="dark"] .note-text { color: #e8e4dc; }
+        [data-theme="dark"] .note-sub { color: #7a7570; }
+        [data-theme="dark"] .note-border { border-color: rgba(255,255,255,0.06); }
+
+        /* Alto contraste */
+        [data-theme="contrast"] { --bg: #000; --header-bg: rgba(0,0,0,0.95); --header-border: #222; --text: #fff; --muted: #555; --btn-bg: #fff; --btn-text: #000; }
+        [data-theme="contrast"] .note-0 { background: #F5F0E8; }
+        [data-theme="contrast"] .note-1 { background: #FFFFF0; }
+        [data-theme="contrast"] .note-2 { background: #F0F0F5; }
+        [data-theme="contrast"] .note-3 { background: #FFF8F0; }
+        [data-theme="contrast"] .note-4 { background: #FFFFFF; }
+        [data-theme="contrast"] .note { box-shadow: 3px 5px 0px #fff; }
+        [data-theme="contrast"] .note:hover { box-shadow: 6px 8px 0px #fff; }
+        [data-theme="contrast"] .tag { background: #000; color: #fff; }
+        [data-theme="contrast"] .note-text { color: #000; }
+        [data-theme="contrast"] .note-sub { color: #444; }
+        [data-theme="contrast"] .note-border { border-color: rgba(0,0,0,0.15); }
+
+        /* ── LAYOUT ────────────────────────────────────────── */
+        body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--header-border);
+            backdrop-filter: blur(12px);
+        }
+        header a, header span, header nav a { color: var(--text); }
+        header nav a.muted { color: var(--muted); }
+
+        .pub-btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+        }
+        .pub-btn:hover { opacity: 0.85; }
+
+        /* ── NOTAS ─────────────────────────────────────────── */
+        .note:nth-child(5n)   { transform: rotate(2.2deg);  }
+        .note:nth-child(5n+1) { transform: rotate(-2.8deg); }
+        .note:nth-child(5n+2) { transform: rotate(1.1deg);  }
+        .note:nth-child(5n+3) { transform: rotate(-1.5deg); }
+        .note:nth-child(5n+4) { transform: rotate(3.0deg);  }
+
+        .note:nth-child(3n)   { margin-top: 18px; }
+        .note:nth-child(4n+1) { margin-top: 32px; }
+        .note:nth-child(5n+2) { margin-top: 8px;  }
+        .note:nth-child(7n)   { margin-top: 44px; }
+
+        .note {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 2px;
+        }
+        .note:hover {
+            transform: rotate(0deg) scale(1.04) !important;
+            z-index: 10;
+        }
+        .note.seen { display: none; }
+
+        @keyframes noteIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; }
+        }
+        .note { animation: noteIn 0.3s ease both; }
+        .note:nth-child(1)  { animation-delay: 0.03s; }
+        .note:nth-child(2)  { animation-delay: 0.06s; }
+        .note:nth-child(3)  { animation-delay: 0.09s; }
+        .note:nth-child(4)  { animation-delay: 0.12s; }
+        .note:nth-child(5)  { animation-delay: 0.15s; }
+        .note:nth-child(6)  { animation-delay: 0.18s; }
+        .note:nth-child(7)  { animation-delay: 0.21s; }
+        .note:nth-child(8)  { animation-delay: 0.24s; }
+        .note:nth-child(9)  { animation-delay: 0.27s; }
+        .note:nth-child(10) { animation-delay: 0.30s; }
+        .note:nth-child(n+11) { animation-delay: 0.33s; }
+
+        /* ── SELECTOR DE TEMA ──────────────────────────────── */
+        .theme-btn {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+        .theme-btn:hover { transform: scale(1.2); }
+        .theme-btn.active { border-color: var(--text); }
+
+        /* ── PANEL VISTAS ──────────────────────────────────── */
+        #seen-list a { color: var(--text); }
+        #seen-list a:hover { background: rgba(128,128,128,0.1); }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="px-6 py-4 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <span class="text-lg font-semibold tracking-tight">BANDEO</span>
+                <nav class="flex gap-4 text-sm">
+                    <a href="/" class="font-medium">Directorio</a>
+                    <a href="/bandas" class="muted hover:opacity-100 transition-opacity">Bandas</a>
+                </nav>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Selector de tema -->
+                <div class="flex items-center gap-2">
+                    <button class="theme-btn active" data-theme="light" style="background:#F5F4F0; border-color: #999;" title="Claro" onclick="setTheme('light')"></button>
+                    <button class="theme-btn" data-theme="dark"  style="background:#1a1814;" title="Oscuro" onclick="setTheme('dark')"></button>
+                    <button class="theme-btn" data-theme="contrast" style="background:#000; border: 2px solid #555;" title="Contraste" onclick="setTheme('contrast')"></button>
+                </div>
+
+                <a href="/create" class="pub-btn text-sm px-4 py-2 rounded-full font-medium transition-opacity">
+                    + Publicar
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Grid -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        {% if profiles %}
+
+        <p class="text-xs mb-10 tracking-wide" style="color: var(--muted)" id="new-count"></p>
+
+        <div class="flex gap-8 items-start">
+
+            <!-- Notas nuevas -->
+            <div class="flex-1 min-w-0">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5" id="notes-grid">
+                    {% set colors = ['note-0','note-1','note-2','note-3','note-4'] %}
+                    {% for profile in profiles %}
+                    <a
+                        href="/profile/{{ profile.user_id }}"
+                        class="note {{ colors[loop.index0 % 5] }} p-5 flex flex-col gap-3 cursor-pointer"
+                        data-id="{{ profile.user_id }}"
+                        data-name="{{ profile.user.display_name }}"
+                        data-city="{{ profile.city }}"
+                    >
+                        <span class="text-[10px] uppercase tracking-widest font-medium" style="color:var(--muted)">
+                            {{ "Músico" if profile.user.role == "MUSICO" else "Banda" }}
+                        </span>
+
+                        <h2 class="note-text font-semibold text-[15px] leading-snug">
+                            {{ profile.user.display_name }}
+                        </h2>
+
+                        <div class="flex flex-wrap gap-1">
+                            {% for item in profile.instruments.split(',') %}
+                            <span class="tag text-[11px] px-2 py-0.5 rounded-full font-medium">{{ item.strip() }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <p class="note-sub text-[11px] leading-relaxed">{{ profile.genres }}</p>
+
+                        <div class="note-border mt-auto pt-2 border-t text-[11px]" style="color:var(--muted)">
+                            {{ profile.city }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Panel vistas (desktop) -->
+            <div id="seen-panel" class="hidden" style="width:180px; flex-shrink:0;">
+                <p class="text-[10px] uppercase tracking-widest mb-3 font-medium" style="color:var(--muted)">Ya vistas</p>
+                <div id="seen-list" class="flex flex-col gap-0.5 text-sm"></div>
+                <button onclick="clearSeen()" class="mt-4 text-[11px] transition-colors" style="color:var(--muted)">
+                    Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Vistas mobile -->
+        <div id="seen-mobile" class="hidden mt-12 pt-8" style="border-top: 1px solid var(--header-border)">
+            <p class="text-[10px] uppercase tracking-widest mb-4 font-medium" style="color:var(--muted)">Ya vistas</p>
+            <div id="seen-list-mobile" class="grid grid-cols-2 gap-2 text-sm"></div>
+            <button onclick="clearSeen()" class="mt-4 text-[11px]" style="color:var(--muted)">Limpiar historial</button>
+        </div>
+
+        {% else %}
+        <div class="text-center py-32">
+            <p style="color:var(--muted)" class="mb-3">No hay perfiles todavía.</p>
+            <a href="/create" class="text-sm underline">Publicá el primero</a>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+        // ── TEMA ──────────────────────────────────────────────
+        function setTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('bandeo_theme', t);
+            document.querySelectorAll('.theme-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.theme === t);
+            });
+        }
+
+        // Aplicar tema guardado antes de pintar
+        const savedTheme = localStorage.getItem('bandeo_theme') || 'light';
+        setTheme(savedTheme);
+
+        // ── VISTAS ────────────────────────────────────────────
+        const STORAGE_KEY = 'bandeo_seen';
+
+        function getSeen() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+            catch { return {}; }
+        }
+        function markSeen(id, name, city) {
+            const seen = getSeen();
+            seen[id] = { name, city };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(seen));
+        }
+        function clearSeen() {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+
+        function applySeenState() {
+            const seen = getSeen();
+            const notes = document.querySelectorAll('.note[data-id]');
+            const seenList = document.getElementById('seen-list');
+            const seenListMobile = document.getElementById('seen-list-mobile');
+            const seenPanel = document.getElementById('seen-panel');
+            const seenMobile = document.getElementById('seen-mobile');
+            let newCount = 0, seenCount = 0;
+
+            notes.forEach(note => {
+                const { id, name, city } = note.dataset;
+                if (seen[id]) {
+                    note.classList.add('seen');
+                    seenCount++;
+
+                    const mkItem = (href, cls) => {
+                        const a = document.createElement('a');
+                        a.href = href;
+                        a.className = cls;
+                        a.innerHTML = `<span style="font-weight:500">${name}</span><br><span style="color:var(--muted);font-size:11px">${city}</span>`;
+                        return a;
+                    };
+                    seenList.appendChild(mkItem(`/profile/${id}`, 'block px-2 py-1.5 rounded transition-colors'));
+                    seenListMobile.appendChild(mkItem(`/profile/${id}`, 'block bg-white/5 rounded p-3'));
+                } else {
+                    newCount++;
+                }
+            });
+
+            if (seenCount > 0) {
+                (window.innerWidth < 640 ? seenMobile : seenPanel).classList.remove('hidden');
+            }
+
+            const countEl = document.getElementById('new-count');
+            countEl.textContent = newCount === 0 && seenCount > 0
+                ? 'Viste todos los perfiles.'
+                : `${newCount} perfil${newCount !== 1 ? 'es' : ''}`;
+        }
+
+        document.querySelectorAll('.note[data-id]').forEach(note => {
+            note.addEventListener('click', () => markSeen(note.dataset.id, note.dataset.name, note.dataset.city));
+        });
+
+        applySeenState();
+    </script>
+
+</body>
+</html>

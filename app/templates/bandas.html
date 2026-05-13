@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bandas — BANDEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+
+        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; }
+        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; }
+        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; }
+
+        body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+        header { background: var(--header-bg); border-bottom: 1px solid var(--header-border); backdrop-filter: blur(12px); }
+
+        .pub-btn { background: var(--btn-bg); color: var(--btn-text); }
+        .pub-btn:hover { opacity: 0.85; }
+
+        /* ── CARRUSEL ──────────────────────────────────────── */
+        .carousel-track {
+            display: flex;
+            gap: 20px;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 32px;
+            flex-shrink: 0;
+            width: 520px;
+            max-width: 85vw;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: box-shadow 0.2s;
+        }
+        .post-card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="dark"] .post-card:hover    { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+        [data-theme="contrast"] .post-card:hover { box-shadow: 0 0 0 2px #fff; }
+
+        .arrow-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--text);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .arrow-btn:hover { opacity: 0.7; }
+        .arrow-btn:disabled { opacity: 0.2; cursor: default; }
+
+        /* Dots */
+        .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--muted);
+            transition: background 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .dot.active {
+            background: var(--text);
+            transform: scale(1.4);
+        }
+
+        /* Tema btns */
+        .theme-btn { width:18px; height:18px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:border-color 0.15s, transform 0.15s; }
+        .theme-btn:hover { transform: scale(1.2); }
+        .theme-btn.active { border-color: var(--text); }
+    </style>
+</head>
+<body>
+
+    {% include "_header.html" %}
+
+    <main class="max-w-4xl mx-auto px-6 py-12">
+
+        <div class="flex items-end justify-between mb-12">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight mb-1">Novedades</h1>
+                <p class="text-sm" style="color:var(--muted)">Lo que están haciendo las bandas.</p>
+            </div>
+            <a href="/bandas/nuevo" class="pub-btn text-sm px-4 py-2 rounded-full font-medium">
+                + Publicar
+            </a>
+        </div>
+
+        {% if posts %}
+
+        <!-- Carrusel -->
+        <div class="overflow-hidden" id="carousel-viewport">
+            <div class="carousel-track" id="carousel-track">
+                {% for post in posts %}
+                <div class="post-card">
+                    <!-- Header de la card -->
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <a href="/profile/{{ post.user_id }}" class="font-bold text-xl hover:underline" style="color:var(--text)">
+                                {{ post.user.display_name }}
+                            </a>
+                            <p class="text-sm mt-0.5" style="color:var(--muted)">
+                                {{ post.user.role | replace("MUSICO","Músico") | replace("BANDA","Banda") }}
+                                {% if post.user.profile and post.user.profile.city %}
+                                · {{ post.user.profile.city }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <span class="text-xs mt-1" style="color:var(--muted)">
+                            {{ post.created_at.strftime('%d/%m/%Y') }}
+                        </span>
+                    </div>
+
+                    <!-- Contenido -->
+                    <p class="leading-relaxed whitespace-pre-wrap text-base" style="color:var(--text)">{{ post.content }}</p>
+
+                    <!-- Footer: géneros si tiene perfil -->
+                    {% if post.user.profile %}
+                    <div class="flex flex-wrap gap-2 mt-auto pt-4" style="border-top: 1px solid var(--card-border)">
+                        {% for item in post.user.profile.genres.split(',') %}
+                        <span class="text-xs px-2 py-0.5 rounded-full" style="background:var(--header-border); color:var(--muted)">
+                            {{ item.strip() }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="flex items-center gap-4 mt-8">
+            <button class="arrow-btn" id="prev-btn" onclick="slide(-1)" disabled>←</button>
+            <button class="arrow-btn" id="next-btn" onclick="slide(1)">→</button>
+
+            <div class="flex items-center gap-2 ml-2" id="dots"></div>
+
+            <span class="text-xs ml-auto" style="color:var(--muted)" id="counter">1 / {{ posts|length }}</span>
+        </div>
+
+        {% else %}
+        <div class="text-center py-24">
+            <p style="color:var(--muted)" class="mb-3">Todavía no hay novedades.</p>
+            <a href="/bandas/nuevo" class="text-sm underline">Publicá la primera</a>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <script>
+        // ── TEMA ──────────────────────────────────────────────
+        function setTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('bandeo_theme', t);
+        }
+        const savedTheme = localStorage.getItem('bandeo_theme') || 'light';
+        setTheme(savedTheme);
+
+        // ── CARRUSEL ──────────────────────────────────────────
+        const track   = document.getElementById('carousel-track');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const counter = document.getElementById('counter');
+        const dotsEl  = document.getElementById('dots');
+
+        if (!track) { /* no hay posts */ }
+        else {
+            const cards = track.querySelectorAll('.post-card');
+            const total = cards.length;
+            let current = 0;
+
+            // Crear dots
+            cards.forEach((_, i) => {
+                const d = document.createElement('button');
+                d.className = 'dot' + (i === 0 ? ' active' : '');
+                d.onclick = () => goTo(i);
+                dotsEl.appendChild(d);
+            });
+
+            function goTo(idx) {
+                current = Math.max(0, Math.min(idx, total - 1));
+                const cardW = cards[0].offsetWidth + 20; // width + gap
+                track.style.transform = `translateX(-${current * cardW}px)`;
+                prevBtn.disabled = current === 0;
+                nextBtn.disabled = current === total - 1;
+                counter.textContent = `${current + 1} / ${total}`;
+                dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+            }
+
+            function slide(dir) { goTo(current + dir); }
+
+            // Swipe en mobile
+            let startX = 0;
+            track.addEventListener('touchstart', e => startX = e.touches[0].clientX, { passive: true });
+            track.addEventListener('touchend', e => {
+                const diff = startX - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 50) slide(diff > 0 ? 1 : -1);
+            });
+
+            // Teclado
+            document.addEventListener('keydown', e => {
+                if (e.key === 'ArrowRight') slide(1);
+                if (e.key === 'ArrowLeft')  slide(-1);
+            });
+
+            goTo(0);
+        }
+    </script>
+
+</body>
+</html>

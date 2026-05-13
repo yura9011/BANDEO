@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados — BANDEO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 min-h-screen">
+
+    <!-- Header -->
+    <header class="px-6 py-5 flex justify-between items-center border-b border-gray-100">
+        <a href="/" class="text-lg font-semibold tracking-tight hover:opacity-70 transition-opacity">BANDEO</a>
+        <a href="/create" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+            Publicar perfil →
+        </a>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 py-12">
+
+        <!-- Búsqueda activa + link para limpiar -->
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                {% if instrument or genre or city %}
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Buscando</p>
+                <p class="text-lg font-medium">
+                    {% if instrument %}{{ instrument }}{% endif %}
+                    {% if genre %}{% if instrument %} · {% endif %}{{ genre }}{% endif %}
+                    {% if city %}{% if instrument or genre %} · {% endif %}{{ city }}{% endif %}
+                </p>
+                {% else %}
+                <p class="text-lg font-medium">Todos los perfiles</p>
+                {% endif %}
+            </div>
+            <a href="/" class="text-sm text-gray-400 hover:text-gray-900 transition-colors">← Nueva búsqueda</a>
+        </div>
+
+        <!-- Resultados -->
+        {% if profiles %}
+        <div class="divide-y divide-gray-100">
+            {% for profile in profiles %}
+            <a href="/profile/{{ profile.user_id }}" class="flex items-start justify-between py-6 group">
+
+                <div class="flex-1 pr-8">
+                    <!-- Nombre + ciudad -->
+                    <div class="flex items-baseline gap-3 mb-2">
+                        <h2 class="text-lg font-semibold group-hover:underline">{{ profile.user.display_name }}</h2>
+                        <span class="text-sm text-gray-400">{{ profile.city }}</span>
+                    </div>
+
+                    <!-- Tags: instrumentos y géneros -->
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        {% for item in profile.instruments.split(',') %}
+                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ item.strip() }}</span>
+                        {% endfor %}
+                        {% for item in profile.genres.split(',') %}
+                        <span class="text-xs border border-gray-200 text-gray-500 px-2 py-1 rounded-full">{{ item.strip() }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Bio -->
+                    {% if profile.bio %}
+                    <p class="text-sm text-gray-500 line-clamp-2">{{ profile.bio }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Distancia + tipo -->
+                <div class="text-right shrink-0">
+                    {% if profile.distance %}
+                    <p class="text-sm font-medium">{{ "%.0f"|format(profile.distance) }} km</p>
+                    {% endif %}
+                    <p class="text-xs text-gray-400 mt-1">{{ "Músico" if profile.user.role == "MUSICO" else "Banda" }}</p>
+                </div>
+
+            </a>
+            {% endfor %}
+        </div>
+
+        <p class="text-xs text-gray-400 text-center mt-10">{{ profiles|length }} resultado{{ 's' if profiles|length != 1 }}</p>
+
+        {% else %}
+        <div class="text-center py-24">
+            <p class="text-gray-400 mb-4">Sin resultados para esa búsqueda.</p>
+            <a href="/" class="text-sm underline hover:text-gray-600">Intentar de nuevo</a>
+        </div>
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

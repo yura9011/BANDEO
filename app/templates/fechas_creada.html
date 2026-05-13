@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fecha publicada — BANDEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+        [data-theme="light"]   { --bg:#F5F4F0; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; }
+        [data-theme="dark"]    { --bg:#1a1814; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; }
+        [data-theme="contrast"]{ --bg:#000;    --text:#fff;   --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; }
+        body { background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+        .pub-btn { background:var(--btn-bg); color:var(--btn-text); }
+    </style>
+    <script>
+        const t = localStorage.getItem('bandeo_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+    </script>
+</head>
+<body>
+    <div class="max-w-sm w-full text-center">
+        <p class="text-4xl mb-6">✓</p>
+        <h2 class="text-xl font-bold mb-2">Fecha publicada</h2>
+        <p class="text-sm mb-2" style="color:var(--muted)">
+            {{ event.venue }} · {{ event.date.strftime('%d/%m/%Y') }}
+            {% if event.time %} · {{ event.time }}{% endif %}
+        </p>
+        <p class="text-sm mb-10" style="color:var(--muted)">Ya aparece en el calendario.</p>
+
+        <div class="space-y-3">
+            <a href="/fechas?year={{ event.date.year }}&month={{ event.date.month }}"
+               class="pub-btn block w-full py-3 rounded-full text-sm font-medium">
+                Ver en el calendario
+            </a>
+            <a href="/profile/{{ user.id }}"
+               class="block w-full py-3 rounded-full text-sm transition-colors"
+               style="border:1px solid var(--card-border); color:var(--text)">
+                Ver mi perfil
+            </a>
+        </div>
+    </div>
+</body>
+</html>

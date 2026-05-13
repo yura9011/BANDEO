@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar fecha — BANDEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; }
+        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; }
+        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; }
+        body { background:var(--bg); color:var(--text); }
+        header { background:var(--header-bg); border-bottom:1px solid var(--header-border); backdrop-filter:blur(12px); }
+        .pub-btn { background:var(--btn-bg); color:var(--btn-text); }
+        .field { background:var(--card-bg); border:1px solid var(--card-border); color:var(--text); border-radius:8px; padding:12px 16px; width:100%; font-size:14px; }
+        .field:focus { outline:none; border-color:var(--text); }
+        .field::placeholder { color:var(--muted); }
+        label { font-size:13px; color:var(--muted); display:block; margin-bottom:6px; }
+    </style>
+    <script>
+        const t = localStorage.getItem('bandeo_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        function setTheme(t) { document.documentElement.setAttribute('data-theme',t); localStorage.setItem('bandeo_theme',t); }
+    </script>
+</head>
+<body>
+    {% set active = "fechas" %}
+    {% include "_header.html" %}
+
+    <main class="max-w-lg mx-auto px-6 py-14">
+        <p class="text-xs uppercase tracking-widest mb-2" style="color:var(--muted)">Publicando como</p>
+        <h1 class="text-2xl font-bold tracking-tight mb-10">{{ user.display_name }}</h1>
+
+        <form method="post" action="/fechas/nueva" class="space-y-5">
+            <input type="hidden" name="token" value="{{ token }}">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Fecha *</label>
+                    <input type="date" name="event_date" required class="field">
+                </div>
+                <div>
+                    <label>Hora</label>
+                    <input type="time" name="time" class="field">
+                </div>
+            </div>
+
+            <div>
+                <label>Lugar / Venue *</label>
+                <input type="text" name="venue" required placeholder="Bar El Farol" class="field">
+            </div>
+
+            <div>
+                <label>Dirección</label>
+                <input type="text" name="address" placeholder="Av. Corrientes 1234" class="field">
+            </div>
+
+            <div>
+                <label>Ciudad *</label>
+                <input type="text" name="city" required placeholder="Buenos Aires" class="field">
+            </div>
+
+            <div>
+                <label>Entrada</label>
+                <input type="text" name="price" placeholder="Gratis / $2000 / A la gorra" class="field">
+            </div>
+
+            <div>
+                <label>Detalles (opcional)</label>
+                <textarea name="details" rows="3" placeholder="Info extra, links, etc."
+                          class="field resize-none"></textarea>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button type="submit" class="pub-btn px-8 py-3 rounded-full text-sm font-medium">
+                    Publicar fecha
+                </button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicar — BANDEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>* { font-family: 'DM Sans', -apple-system, sans-serif; }</style>
+</head>
+<body class="bg-stone-100 text-gray-900 min-h-screen">
+
+    {% set active = "bandas" %}
+    {% include "_header.html" %}
+
+    <main class="max-w-md mx-auto px-6 py-20">
+        <h1 class="text-2xl font-bold tracking-tight mb-2">Publicar novedad</h1>
+        <p class="text-sm text-gray-400 mb-10">Ingresá tu token de edición para identificarte.</p>
+
+        {% if error %}
+        <p class="text-sm text-red-400 mb-6">{{ error }}</p>
+        {% endif %}
+
+        <form method="get" action="/bandas/nuevo" class="space-y-4">
+            <input
+                type="text"
+                name="token"
+                placeholder="Tu token de edición"
+                required
+                class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gray-900 placeholder-gray-400"
+            >
+            <button type="submit" class="w-full bg-gray-900 hover:bg-gray-700 text-white py-3 rounded-full text-sm font-medium transition-colors">
+                Continuar
+            </button>
+        </form>
+
+        <p class="text-xs text-gray-400 mt-6">
+            ¿No tenés perfil? <a href="/create" class="underline hover:text-gray-600">Creá uno primero</a>.
+        </p>
+    </main>
+
+</body>
+</html>

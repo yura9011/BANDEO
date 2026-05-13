@@ -1,0 +1,309 @@
+from fastapi import FastAPI, Request, Form, Depends, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlmodel import Session, select
+from app.database import create_db_and_tables, get_session
+from app.models.user import User, Profile, Post, Event
+from app.utils import (
+    get_coordinates,
+    calculate_distance,
+    extract_youtube_id,
+    generate_edit_token,
+    generate_whatsapp_link,
+    normalize_instagram_link,
+    clean_phone_number,
+    normalize_text_list,
+    validate_url
+)
+from typing import Optional
+import uvicorn
+import calendar
+from datetime import date, datetime
+
+app = FastAPI(title="BANDEO")
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+templates.env.globals.update(
+    extract_youtube_id=extract_youtube_id,
+    generate_whatsapp_link=generate_whatsapp_link,
+    normalize_instagram_link=normalize_instagram_link,
+)
+
+# ── DIRECTORIO ────────────────────────────────────────────────────────────────
+
+@app.get("/", response_class=HTMLResponse)
+async def landing_page(request: Request, session: Session = Depends(get_session)):
+    profiles = session.exec(select(Profile).join(User).limit(100)).all()
+    return templates.TemplateResponse("landing.html", {"request": request, "profiles": profiles})
+
+# ── CREAR PERFIL ──────────────────────────────────────────────────────────────
+
+@app.get("/create", response_class=HTMLResponse)
+async def get_create_profile_form(request: Request):
+    return templates.TemplateResponse("create_profile.html", {"request": request})
+
+@app.post("/create", response_class=HTMLResponse)
+async def create_profile(
+    request: Request,
+    role: str = Form(...),
+    display_name: str = Form(...),
+    city: str = Form(...),
+    instruments: str = Form(...),
+    genres: str = Form(...),
+    bio: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    youtube_links: Optional[str] = Form(None),
+    spotify_link: Optional[str] = Form(None),
+    instagram_link: Optional[str] = Form(None),
+    session: Session = Depends(get_session)
+):
+    if role not in ["MUSICO", "BANDA"]:
+        raise HTTPException(status_code=400, detail="Rol inválido")
+    if spotify_link and not validate_url(spotify_link):
+        raise HTTPException(status_code=400, detail="URL de Spotify inválida")
+
+    for attempt in range(3):
+        try:
+            edit_token = generate_edit_token()
+            new_user = User(role=role, display_name=display_name.strip(), edit_token=edit_token)
+            session.add(new_user)
+            session.commit()
+            session.refresh(new_user)
+            break
+        except Exception:
+            if attempt == 2:
+                raise HTTPException(status_code=500, detail="Error creando usuario")
+            session.rollback()
+
+    lat, lng = await get_coordinates(city)
+    new_profile = Profile(
+        user_id=new_user.id,
+        city=city.strip(), lat=lat, lng=lng,
+        instruments=normalize_text_list(instruments),
+        genres=normalize_text_list(genres),
+        bio=bio.strip() if bio else None,
+        phone=clean_phone_number(phone),
+        youtube_links=youtube_links.strip() if youtube_links else None,
+        spotify_link=spotify_link.strip() if spotify_link else None,
+        instagram_link=instagram_link.strip() if instagram_link else None,
+    )
+    session.add(new_profile)
+    session.commit()
+
+    return templates.TemplateResponse("profile_created.html", {
+        "request": request, "edit_token": edit_token, "user_id": new_user.id
+    })
+
+# ── EDITAR PERFIL ─────────────────────────────────────────────────────────────
+
+@app.get("/edit/{edit_token}", response_class=HTMLResponse)
+async def get_edit_profile_form(request: Request, edit_token: str, session: Session = Depends(get_session)):
+    user = session.exec(select(User).where(User.edit_token == edit_token)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Token inválido")
+    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    return templates.TemplateResponse("edit_profile.html", {
+        "request": request, "user": user, "profile": profile, "edit_token": edit_token
+    })
+
+@app.post("/edit/{edit_token}", response_class=HTMLResponse)
+async def update_profile(
+    request: Request,
+    edit_token: str,
+    display_name: str = Form(...),
+    city: str = Form(...),
+    instruments: str = Form(...),
+    genres: str = Form(...),
+    bio: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    youtube_links: Optional[str] = Form(None),
+    spotify_link: Optional[str] = Form(None),
+    instagram_link: Optional[str] = Form(None),
+    session: Session = Depends(get_session)
+):
+    user = session.exec(select(User).where(User.edit_token == edit_token)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Token inválido")
+    if spotify_link and not validate_url(spotify_link):
+        raise HTTPException(status_code=400, detail="URL de Spotify inválida")
+
+    user.display_name = display_name.strip()
+    session.add(user)
+
+    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    if profile:
+        lat, lng = await get_coordinates(city)
+        profile.city = city.strip()
+        profile.lat = lat; profile.lng = lng
+        profile.instruments = normalize_text_list(instruments)
+        profile.genres = normalize_text_list(genres)
+        profile.bio = bio.strip() if bio else None
+        profile.phone = clean_phone_number(phone)
+        profile.youtube_links = youtube_links.strip() if youtube_links else None
+        profile.spotify_link = spotify_link.strip() if spotify_link else None
+        profile.instagram_link = instagram_link.strip() if instagram_link else None
+        session.add(profile)
+
+    session.commit()
+    return templates.TemplateResponse("profile_updated.html", {
+        "request": request, "user": user, "edit_token": edit_token
+    })
+
+# ── VER PERFIL ────────────────────────────────────────────────────────────────
+
+@app.get("/profile/{user_id}", response_class=HTMLResponse)
+async def get_profile_detail(request: Request, user_id: int, session: Session = Depends(get_session)):
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404)
+    profile = session.exec(select(Profile).where(Profile.user_id == user_id)).first()
+    if not profile:
+        raise HTTPException(status_code=404)
+    return templates.TemplateResponse("profile_detail.html", {
+        "request": request, "user": user, "profile": profile
+    })
+
+# ── BANDAS ────────────────────────────────────────────────────────────────────
+
+@app.get("/bandas", response_class=HTMLResponse)
+async def bandas_page(request: Request, session: Session = Depends(get_session)):
+    posts = session.exec(select(Post).order_by(Post.created_at.desc()).limit(100)).all()
+    return templates.TemplateResponse("bandas.html", {"request": request, "posts": posts})
+
+@app.get("/bandas/nuevo", response_class=HTMLResponse)
+async def nuevo_post_form(request: Request, token: Optional[str] = None, session: Session = Depends(get_session)):
+    if not token:
+        return templates.TemplateResponse("bandas_token.html", {"request": request})
+    user = session.exec(select(User).where(User.edit_token == token)).first()
+    if not user:
+        return templates.TemplateResponse("bandas_token.html", {"request": request, "error": "Token inválido."})
+    return templates.TemplateResponse("bandas_nuevo.html", {"request": request, "user": user, "token": token})
+
+@app.post("/bandas/nuevo", response_class=HTMLResponse)
+async def crear_post(request: Request, token: str = Form(...), content: str = Form(...), session: Session = Depends(get_session)):
+    user = session.exec(select(User).where(User.edit_token == token)).first()
+    if not user:
+        raise HTTPException(status_code=403, detail="Token inválido")
+    content = content.strip()
+    if not content or len(content) > 500:
+        raise HTTPException(status_code=400, detail="Contenido inválido")
+    session.add(Post(user_id=user.id, content=content))
+    session.commit()
+    return templates.TemplateResponse("bandas_post_creado.html", {"request": request, "user": user})
+
+# ── CALENDARIO ────────────────────────────────────────────────────────────────
+
+@app.get("/fechas", response_class=HTMLResponse)
+async def fechas_page(
+    request: Request,
+    year: Optional[int] = None,
+    month: Optional[int] = None,
+    session: Session = Depends(get_session)
+):
+    today = date.today()
+    year  = year  or today.year
+    month = month or today.month
+
+    # Navegar entre meses válidos
+    year  = max(2020, min(2030, year))
+    month = max(1, min(12, month))
+
+    # Mes anterior / siguiente
+    if month == 1:
+        prev_year, prev_month = year - 1, 12
+    else:
+        prev_year, prev_month = year, month - 1
+
+    if month == 12:
+        next_year, next_month = year + 1, 1
+    else:
+        next_year, next_month = year, month + 1
+
+    # Días del mes
+    cal = calendar.monthcalendar(year, month)
+
+    # Eventos del mes
+    first_day = date(year, month, 1)
+    last_day  = date(year, month, calendar.monthrange(year, month)[1])
+    events = session.exec(
+        select(Event)
+        .where(Event.date >= first_day)
+        .where(Event.date <= last_day)
+        .order_by(Event.date, Event.time)
+    ).all()
+
+    # Agrupar por día
+    events_by_day: dict = {}
+    for ev in events:
+        events_by_day.setdefault(ev.date.day, []).append(ev)
+
+    month_names = ["", "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+
+    return templates.TemplateResponse("fechas.html", {
+        "request": request,
+        "year": year, "month": month,
+        "month_name": month_names[month],
+        "cal": cal,
+        "events_by_day": events_by_day,
+        "today": today,
+        "prev_year": prev_year, "prev_month": prev_month,
+        "next_year": next_year, "next_month": next_month,
+    })
+
+@app.get("/fechas/nueva", response_class=HTMLResponse)
+async def nueva_fecha_form(request: Request, token: Optional[str] = None, session: Session = Depends(get_session)):
+    if not token:
+        return templates.TemplateResponse("fechas_token.html", {"request": request})
+    user = session.exec(select(User).where(User.edit_token == token)).first()
+    if not user:
+        return templates.TemplateResponse("fechas_token.html", {"request": request, "error": "Token inválido."})
+    return templates.TemplateResponse("fechas_nueva.html", {"request": request, "user": user, "token": token})
+
+@app.post("/fechas/nueva", response_class=HTMLResponse)
+async def crear_fecha(
+    request: Request,
+    token: str = Form(...),
+    event_date: str = Form(...),
+    time: Optional[str] = Form(None),
+    venue: str = Form(...),
+    address: Optional[str] = Form(None),
+    city: str = Form(...),
+    price: Optional[str] = Form(None),
+    details: Optional[str] = Form(None),
+    session: Session = Depends(get_session)
+):
+    user = session.exec(select(User).where(User.edit_token == token)).first()
+    if not user:
+        raise HTTPException(status_code=403, detail="Token inválido")
+
+    try:
+        parsed_date = date.fromisoformat(event_date)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Fecha inválida")
+
+    event = Event(
+        user_id=user.id,
+        date=parsed_date,
+        time=time.strip() if time else None,
+        venue=venue.strip(),
+        address=address.strip() if address else None,
+        city=city.strip(),
+        price=price.strip() if price else None,
+        details=details.strip() if details else None,
+    )
+    session.add(event)
+    session.commit()
+
+    return templates.TemplateResponse("fechas_creada.html", {
+        "request": request, "user": user, "event": event
+    })
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

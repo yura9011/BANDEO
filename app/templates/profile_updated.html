@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil Actualizado - BANDEO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 min-h-screen flex items-center justify-center p-4">
+    
+    <div class="max-w-md w-full text-center">
+        <div class="text-5xl mb-6">✓</div>
+        <h2 class="text-3xl font-light mb-3">Perfil actualizado</h2>
+        <p class="text-gray-500 mb-12">Tus cambios se guardaron</p>
+
+        <div class="space-y-3">
+            <a href="/profile/{{ user.id }}" class="block w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded transition-colors">
+                Ver mi perfil
+            </a>
+            <a href="/edit/{{ edit_token }}" class="block w-full border border-gray-300 hover:border-gray-900 py-3 rounded transition-colors">
+                Seguir editando
+            </a>
+            <a href="/" class="block w-full text-gray-500 hover:text-gray-900 py-3 transition-colors">
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

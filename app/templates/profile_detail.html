@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.display_name }} — BANDEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; }
+        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; }
+        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; }
+        body { background:var(--bg); color:var(--text); transition:background 0.3s,color 0.3s; }
+        .tag-solid  { background:var(--text); color:var(--bg); }
+        .tag-border { border:1px solid var(--card-border); color:var(--muted); background:var(--card-bg); }
+        .contact-primary { background:var(--text); color:var(--bg); }
+        .contact-primary:hover { opacity:0.85; }
+        .contact-secondary { background:var(--card-bg); border:1px solid var(--card-border); color:var(--text); }
+        .contact-secondary:hover { border-color:var(--text); }
+    </style>
+    <script>
+        const t = localStorage.getItem('bandeo_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        function setTheme(t) { document.documentElement.setAttribute('data-theme',t); localStorage.setItem('bandeo_theme',t); }
+    </script>
+</head>
+<body>
+
+    {% set active = "directorio" %}
+    {% include "_header.html" %}
+
+    <main class="max-w-2xl mx-auto px-6 py-14">
+
+        <a href="/" class="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-900 transition-colors mb-10">
+            ← Volver al directorio
+        </a>
+
+        <!-- Nombre y meta -->
+        <div class="mb-10">
+            <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">
+                {{ "Músico" if user.role == "MUSICO" else "Banda" }} · {{ profile.city }}
+            </p>
+            <h1 class="text-4xl font-bold tracking-tight leading-tight mb-6">{{ user.display_name }}</h1>
+
+            <div class="flex flex-wrap gap-2">
+                {% for item in profile.instruments.split(',') %}
+                <span class="tag-solid text-sm px-3 py-1 rounded-full">{{ item.strip() }}</span>
+                {% endfor %}
+                {% for item in profile.genres.split(',') %}
+                <span class="tag-border text-sm px-3 py-1 rounded-full">{{ item.strip() }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Bio -->
+        {% if profile.bio %}
+        <p class="text-gray-600 leading-relaxed mb-12 text-base">{{ profile.bio }}</p>
+        {% endif %}
+
+        <!-- Video YouTube -->
+        {% if profile.youtube_links %}
+        {% set video_id = extract_youtube_id(profile.youtube_links.split('\n')[0].strip()) %}
+        {% if video_id %}
+        <div class="aspect-video rounded-lg overflow-hidden mb-12 bg-gray-200">
+            <iframe
+                class="w-full h-full"
+                src="https://www.youtube.com/embed/{{ video_id }}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- Contacto -->
+        <div class="space-y-3">
+            {% if profile.phone %}
+            <a href="{{ generate_whatsapp_link(profile.phone, 'Hola! Vi tu perfil en BANDEO.') }}" target="_blank"
+               class="contact-primary flex items-center justify-between w-full px-5 py-4 rounded-lg transition-opacity">
+                <span class="font-medium">Contactar por WhatsApp</span>
+                <span class="text-sm opacity-60">↗</span>
+            </a>
+            {% endif %}
+            {% if profile.instagram_link %}
+            <a href="{{ normalize_instagram_link(profile.instagram_link) }}" target="_blank"
+               class="contact-secondary flex items-center justify-between w-full px-5 py-4 rounded-lg transition-colors">
+                <span class="font-medium">Instagram</span>
+                <span class="text-sm opacity-50">{{ profile.instagram_link }}</span>
+            </a>
+            {% endif %}
+            {% if profile.spotify_link %}
+            <a href="{{ profile.spotify_link }}" target="_blank"
+               class="contact-secondary flex items-center justify-between w-full px-5 py-4 rounded-lg transition-colors">
+                <span class="font-medium">Spotify</span>
+                <span class="text-sm opacity-50">↗</span>
+            </a>
+            {% endif %}
+        </div>
+
+    </main>
+
+</body>
+</html>

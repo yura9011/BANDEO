@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicado — BANDEO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-sm w-full text-center">
+        <p class="text-4xl mb-6">✓</p>
+        <h2 class="text-xl font-bold mb-2">Publicado</h2>
+        <p class="text-sm text-gray-400 mb-10">Tu novedad ya está visible en el tablón.</p>
+
+        <div class="space-y-3">
+            <a href="/bandas" class="block w-full bg-gray-900 hover:bg-gray-700 text-white py-3 rounded-lg text-sm font-medium transition-colors">
+                Ver tablón
+            </a>
+            <a href="/profile/{{ user.id }}" class="block w-full border border-gray-200 hover:border-gray-900 py-3 rounded-lg text-sm transition-colors">
+                Ver mi perfil
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
