@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Request, Form, Depends, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Form, Depends, HTTPException, Response, Cookie
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from app.database import create_db_and_tables, get_session
 from app.models.user import User, Profile, Post, Event
 from app.utils import (
@@ -19,9 +19,25 @@ from app.utils import (
 from typing import Optional
 import uvicorn
 import calendar
+import os
+import secrets
 from datetime import date, datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ADMIN_USER     = os.getenv("ADMIN_USER", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "cambiame123")
+ADMIN_SECRET   = os.getenv("ADMIN_SECRET", "bandeo-session-secret-2026")
 
 app = FastAPI(title="BANDEO")
+
+def check_admin(admin_token: Optional[str] = Cookie(None)) -> bool:
+    return admin_token == ADMIN_SECRET
+
+def require_admin(admin_token: Optional[str] = Cookie(None)):
+    if admin_token != ADMIN_SECRET:
+        raise HTTPException(status_code=303, headers={"Location": "/admin/login"})
 
 @app.on_event("startup")
 def on_startup():
@@ -38,7 +54,9 @@ templates.env.globals["normalize_instagram_link"] = normalize_instagram_link
 
 @app.get("/", response_class=HTMLResponse)
 async def landing_page(request: Request, session: Session = Depends(get_session)):
-    profiles = session.exec(select(Profile).join(User).limit(100)).all()
+    profiles = session.exec(
+        select(Profile).join(User).where(User.status == "approved").limit(100)
+    ).all()
     return templates.TemplateResponse("landing.html", {"request": request, "profiles": profiles})
 
 # ── CREAR PERFIL ──────────────────────────────────────────────────────────────
@@ -172,7 +190,9 @@ async def get_profile_detail(request: Request, user_id: int, session: Session = 
 
 @app.get("/bandas", response_class=HTMLResponse)
 async def bandas_page(request: Request, session: Session = Depends(get_session)):
-    posts = session.exec(select(Post).order_by(Post.created_at.desc()).limit(100)).all()
+    posts = session.exec(
+        select(Post).where(Post.status == "approved").order_by(Post.created_at.desc()).limit(100)
+    ).all()
     return templates.TemplateResponse("bandas.html", {"request": request, "posts": posts})
 
 @app.get("/bandas/nuevo", response_class=HTMLResponse)
@@ -232,6 +252,7 @@ async def fechas_page(
     last_day  = date(year, month, calendar.monthrange(year, month)[1])
     events = session.exec(
         select(Event)
+        .where(Event.status == "approved")
         .where(Event.date >= first_day)
         .where(Event.date <= last_day)
         .order_by(Event.date, Event.time)
@@ -307,6 +328,117 @@ async def crear_fecha(
 @app.get("/legal", response_class=HTMLResponse)
 async def legal_page(request: Request):
     return templates.TemplateResponse("legal.html", {"request": request})
+
+# ── ADMIN ─────────────────────────────────────────────────────────────────────
+
+@app.get("/admin/login", response_class=HTMLResponse)
+async def admin_login_form(request: Request):
+    return templates.TemplateResponse("admin_login.html", {"request": request})
+
+@app.post("/admin/login")
+async def admin_login(
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    if username == ADMIN_USER and password == ADMIN_PASSWORD:
+        response = RedirectResponse(url="/admin", status_code=303)
+        response.set_cookie("admin_token", ADMIN_SECRET, httponly=True, max_age=60*60*8)
+        return response
+    return RedirectResponse(url="/admin/login?error=1", status_code=303)
+
+@app.get("/admin/logout")
+async def admin_logout():
+    response = RedirectResponse(url="/admin/login", status_code=303)
+    response.delete_cookie("admin_token")
+    return response
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_panel(
+    request: Request,
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    # Estadísticas
+    total_users    = session.exec(select(func.count(User.id))).one()
+    pending_users  = session.exec(select(func.count(User.id)).where(User.status == "pending")).one()
+    approved_users = session.exec(select(func.count(User.id)).where(User.status == "approved")).one()
+
+    total_posts    = session.exec(select(func.count(Post.id))).one()
+    pending_posts  = session.exec(select(func.count(Post.id)).where(Post.status == "pending")).one()
+
+    total_events   = session.exec(select(func.count(Event.id))).one()
+    pending_events = session.exec(select(func.count(Event.id)).where(Event.status == "pending")).one()
+
+    # Pendientes
+    pending_user_list  = session.exec(select(User).where(User.status == "pending").order_by(User.created_at.desc())).all()
+    pending_post_list  = session.exec(select(Post).where(Post.status == "pending").order_by(Post.created_at.desc())).all()
+    pending_event_list = session.exec(select(Event).where(Event.status == "pending").order_by(Event.created_at.desc())).all()
+
+    return templates.TemplateResponse("admin_panel.html", {
+        "request": request,
+        "stats": {
+            "total_users": total_users, "pending_users": pending_users, "approved_users": approved_users,
+            "total_posts": total_posts, "pending_posts": pending_posts,
+            "total_events": total_events, "pending_events": pending_events,
+        },
+        "pending_users": pending_user_list,
+        "pending_posts": pending_post_list,
+        "pending_events": pending_event_list,
+    })
+
+@app.post("/admin/approve/{entity}/{id}", response_class=HTMLResponse)
+async def admin_approve(
+    entity: str, id: int,
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    if entity == "user":
+        obj = session.get(User, id)
+    elif entity == "post":
+        obj = session.get(Post, id)
+    elif entity == "event":
+        obj = session.get(Event, id)
+    else:
+        raise HTTPException(status_code=400)
+
+    if obj:
+        obj.status = "approved"
+        session.add(obj)
+        session.commit()
+
+    return RedirectResponse(url="/admin", status_code=303)
+
+@app.post("/admin/reject/{entity}/{id}", response_class=HTMLResponse)
+async def admin_reject(
+    entity: str, id: int,
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    if entity == "user":
+        obj = session.get(User, id)
+    elif entity == "post":
+        obj = session.get(Post, id)
+    elif entity == "event":
+        obj = session.get(Event, id)
+    else:
+        raise HTTPException(status_code=400)
+
+    if obj:
+        obj.status = "rejected"
+        session.add(obj)
+        session.commit()
+
+    return RedirectResponse(url="/admin", status_code=303)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
