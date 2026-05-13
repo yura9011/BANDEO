@@ -1,9 +1,10 @@
 import os
-from urllib.parse import urlparse, parse_qs
+import ssl
+from urllib.parse import urlparse, parse_qs, urlencode
 from sqlmodel import create_engine, SQLModel, Session
 from app.models.user import User, Profile, Post, Event
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./bandeo.db")
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./bandeo.db")
 
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -12,13 +13,18 @@ else:
     qs = parse_qs(parsed.query)
     sslmode = qs.pop("sslmode", [None])[0]
 
-    clean_url = f"postgresql+psycopg2://{parsed.netloc}{parsed.path}"
+    # Reconstruir URL limpia sin sslmode, forzar pg8000
+    clean_url = f"postgresql+pg8000://{parsed.netloc}{parsed.path}"
     if qs:
-        clean_url += "?" + "&".join(f"{k}={v[0]}" for k, v in qs.items())
+        clean_url += "?" + urlencode({k: v[0] for k, v in qs.items()})
 
     connect_args = {}
-    if sslmode:
-        connect_args["sslmode"] = sslmode
+    if sslmode and sslmode != "disable":
+        # pg8000 usa ssl= con un objeto ssl.SSLContext
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+        connect_args["ssl_context"] = ssl_ctx
 
     engine = create_engine(clean_url, connect_args=connect_args)
 
