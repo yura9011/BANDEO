@@ -2,6 +2,16 @@
 
 Directorio de músicos y bandas. Publicás tu perfil, te encontramos.
 
+## Variables de entorno
+
+Crear un archivo `.env` en la raiz del proyecto:
+
+```
+ADMIN_USER=
+ADMIN_PASSWORD=
+ADMIN_SECRET=
+```
+
 ## Correr localmente
 
 ```bash
