@@ -43,7 +43,7 @@
             <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">
                 {{ "Músico" if user.role == "MUSICO" else "Banda" }} · {{ profile.city }}
             </p>
-            <h1 class="text-4xl font-bold tracking-tight leading-tight mb-6">{{ user.display_name }}</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight leading-tight mb-6">{{ user.display_name }}</h1>
 
             <div class="flex flex-wrap gap-2">
                 {% for item in profile.instruments.split(',') %}
@@ -89,7 +89,7 @@
             <a href="{{ normalize_instagram_link(profile.instagram_link) }}" target="_blank"
                class="contact-secondary flex items-center justify-between w-full px-5 py-4 rounded-lg transition-colors">
                 <span class="font-medium">Instagram</span>
-                <span class="text-sm opacity-50">{{ profile.instagram_link }}</span>
+                <span class="text-sm opacity-50 truncate max-w-[180px] sm:max-w-[300px]">{{ profile.instagram_link }}</span>
             </a>
             {% endif %}
             {% if profile.spotify_link %}

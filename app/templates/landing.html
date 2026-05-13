@@ -73,20 +73,23 @@
         .pub-btn:hover { opacity: 0.85; }
 
         /* ── NOTAS ─────────────────────────────────────────── */
-        .note:nth-child(5n)   { transform: rotate(2.2deg);  }
-        .note:nth-child(5n+1) { transform: rotate(-2.8deg); }
-        .note:nth-child(5n+2) { transform: rotate(1.1deg);  }
-        .note:nth-child(5n+3) { transform: rotate(-1.5deg); }
-        .note:nth-child(5n+4) { transform: rotate(3.0deg);  }
+        .note:nth-child(5n)   { transform: rotate(1.2deg);  }
+        .note:nth-child(5n+1) { transform: rotate(-1.5deg); }
+        .note:nth-child(5n+2) { transform: rotate(0.6deg);  }
+        .note:nth-child(5n+3) { transform: rotate(-0.8deg); }
+        .note:nth-child(5n+4) { transform: rotate(1.6deg);  }
 
-        .note:nth-child(3n)   { margin-top: 18px; }
-        .note:nth-child(4n+1) { margin-top: 32px; }
-        .note:nth-child(5n+2) { margin-top: 8px;  }
-        .note:nth-child(7n)   { margin-top: 44px; }
+        .note:nth-child(3n)   { margin-top: 12px; }
+        .note:nth-child(4n+1) { margin-top: 18px; }
+        .note:nth-child(5n+2) { margin-top: 6px;  }
+        .note:nth-child(7n)   { margin-top: 24px; }
 
         .note {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             border-radius: 2px;
+        }
+        @media (max-width: 640px) {
+            .note { padding: 16px !important; }
         }
         .note:hover {
             transform: rotate(0deg) scale(1.04) !important;
@@ -129,35 +132,8 @@
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="px-6 py-4 sticky top-0 z-20">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <a href="/" class="flex items-center gap-2">
-                    <img src="/static/logo.jpg" alt="Bandeo" style="height:28px;width:28px;object-fit:cover;border-radius:4px;">
-                    <span class="text-lg font-semibold tracking-tight">Bandeo</span>
-                </a>
-                <nav class="flex gap-4 text-sm">
-                    <a href="/" class="font-medium">Directorio</a>
-                    <a href="/bandas" class="muted hover:opacity-100 transition-opacity">Bandas</a>
-                    <a href="/fechas" class="muted hover:opacity-100 transition-opacity">Fechas</a>
-                </nav>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <!-- Selector de tema -->
-                <div class="flex items-center gap-2">
-                    <button class="theme-btn active" data-theme="light" style="background:#F5F4F0; border-color: #999;" title="Claro" onclick="setTheme('light')"></button>
-                    <button class="theme-btn" data-theme="dark"  style="background:#1a1814;" title="Oscuro" onclick="setTheme('dark')"></button>
-                    <button class="theme-btn" data-theme="contrast" style="background:#000; border: 2px solid #555;" title="Contraste" onclick="setTheme('contrast')"></button>
-                </div>
-
-                <a href="/create" class="pub-btn text-sm px-4 py-2 rounded-full font-medium transition-opacity">
-                    + Publicar
-                </a>
-            </div>
-        </div>
-    </header>
+    {% set active = "directorio" %}
+    {% include "_header.html" %}
 
     <!-- Grid -->
     <main class="max-w-7xl mx-auto px-6 py-12">
@@ -186,23 +162,23 @@
                         data-name="{{ profile.user.display_name }}"
                         data-city="{{ profile.city }}"
                     >
-                        <span class="text-[10px] uppercase tracking-widest font-medium" style="color:var(--muted)">
+                        <span class="text-[10px] sm:text-[11px] uppercase tracking-widest font-medium" style="color:var(--muted)">
                             {{ "Músico" if profile.user.role == "MUSICO" else "Banda" }}
                         </span>
 
-                        <h2 class="note-text font-semibold text-[15px] leading-snug">
+                        <h2 class="note-text font-semibold text-[15px] sm:text-base leading-snug">
                             {{ profile.user.display_name }}
                         </h2>
 
                         <div class="flex flex-wrap gap-1">
                             {% for item in profile.instruments.split(',') %}
-                            <span class="tag text-[11px] px-2 py-0.5 rounded-full font-medium">{{ item.strip() }}</span>
+                            <span class="tag text-[11px] sm:text-[13px] px-2 py-0.5 rounded-full font-medium">{{ item.strip() }}</span>
                             {% endfor %}
                         </div>
 
-                        <p class="note-sub text-[11px] leading-relaxed">{{ profile.genres }}</p>
+                        <p class="note-sub text-[11px] sm:text-[13px] leading-relaxed">{{ profile.genres }}</p>
 
-                        <div class="note-border mt-auto pt-2 border-t text-[11px]" style="color:var(--muted)">
+                        <div class="note-border mt-auto pt-2 border-t text-[11px] sm:text-[13px]" style="color:var(--muted)">
                             {{ profile.city }}
                         </div>
                     </a>

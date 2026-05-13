@@ -97,24 +97,25 @@
     <main class="max-w-7xl mx-auto px-6 py-10">
 
         <!-- Nav mes + botón -->
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
             <div class="flex items-center gap-3">
                 <a href="/fechas?year={{ prev_year }}&month={{ prev_month }}"
-                   class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors"
+                   class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors shrink-0"
                    style="border:1px solid var(--card-border); color:var(--text)">←</a>
-                <h1 class="text-xl font-bold tracking-tight">{{ month_name }} {{ year }}</h1>
+                <h1 class="text-lg sm:text-xl font-bold tracking-tight">{{ month_name }} {{ year }}</h1>
                 <a href="/fechas?year={{ next_year }}&month={{ next_month }}"
-                   class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors"
+                   class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors shrink-0"
                    style="border:1px solid var(--card-border); color:var(--text)">→</a>
             </div>
-            <a href="/fechas/nueva" class="pub-btn text-sm px-4 py-2 rounded-full font-medium">+ Agregar fecha</a>
+            <a href="/fechas/nueva" class="pub-btn text-sm px-4 py-2 rounded-full font-medium self-end">+ Agregar fecha</a>
         </div>
 
         <!-- Layout: calendario + lista -->
-        <div class="flex gap-8 items-start">
+        <!-- En mobile: solo lista. En desktop: calendario + lista -->
+        <div class="block lg:flex gap-8 items-start">
 
-            <!-- Calendario -->
-            <div class="flex-1 min-w-0">
+            <!-- Calendario — oculto en mobile -->
+            <div class="hidden lg:block flex-1 min-w-0">
                 <div class="cal-grid">
                     {% for day_name in ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"] %}
                     <div class="cal-header-cell">{{ day_name }}</div>
@@ -143,8 +144,8 @@
                 </div>
             </div>
 
-            <!-- Lista de shows -->
-            <div style="width:280px; flex-shrink:0; position:sticky; top:80px; max-height:calc(100vh - 120px); overflow-y:auto;">
+            <!-- Lista de shows — siempre visible -->
+            <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-20" style="max-height:calc(100vh - 120px); overflow-y:auto;">
                 <div class="flex items-center justify-between mb-4">
                     <p class="text-xs uppercase tracking-widest font-medium" style="color:var(--muted)" id="list-title">
                         {% if events_by_day %}
