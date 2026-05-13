@@ -149,7 +149,7 @@
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
                         <a href="/profile/{{ event.user_id }}" target="_blank"
-                           class="font-semibold text-sm hover:underline">{{ event.user.display_name }}</a>
+                           class="font-semibold text-sm hover:underline">{{ event.band_name or event.user.display_name }}</a>
                         <span class="text-xs text-gray-400">{{ event.date.strftime('%d/%m/%Y') }}{% if event.time %} · {{ event.time }}{% endif %}</span>
                     </div>
                     <p class="text-sm text-gray-700">{{ event.venue }}{% if event.address %}, {{ event.address }}{% endif %}</p>

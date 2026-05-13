@@ -41,6 +41,7 @@ class Post(SQLModel, table=True):
 class Event(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
+    band_name: Optional[str] = None  # nombre de la banda (puede diferir del usuario)
     date: date
     time: Optional[str] = None
     venue: str
@@ -48,6 +49,6 @@ class Event(SQLModel, table=True):
     city: str
     price: Optional[str] = None
     details: Optional[str] = None
-    status: str = Field(default="pending")  # pending | approved | rejected
+    status: str = Field(default="pending")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     user: User = Relationship(back_populates="events")

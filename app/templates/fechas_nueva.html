@@ -38,6 +38,12 @@
         <form method="post" action="/fechas/nueva" class="space-y-5">
             <input type="hidden" name="token" value="{{ token }}">
 
+            <div>
+                <label>Nombre de la banda *</label>
+                <input type="text" name="band_name" required placeholder="Nombre de tu banda" class="field"
+                       value="{{ user.display_name }}">
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label>Fecha *</label>

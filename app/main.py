@@ -297,6 +297,7 @@ async def nueva_fecha_form(request: Request, token: Optional[str] = None, sessio
 async def crear_fecha(
     request: Request,
     token: str = Form(...),
+    band_name: Optional[str] = Form(None),
     event_date: str = Form(...),
     time: Optional[str] = Form(None),
     venue: str = Form(...),
@@ -317,6 +318,7 @@ async def crear_fecha(
 
     event = Event(
         user_id=user.id,
+        band_name=band_name.strip() if band_name else user.display_name,
         date=parsed_date,
         time=time.strip() if time else None,
         venue=venue.strip(),
@@ -340,6 +342,67 @@ async def debug_env():
     if "@" in db_url:
         db_url = db_url.split("@")[0].rsplit(":", 1)[0] + ":***@" + db_url.split("@")[1]
     return {"DATABASE_URL": db_url, "has_db": bool(os.environ.get("DATABASE_URL"))}
+
+@app.get("/admin/fix-band-names")
+async def fix_band_names(
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    """Actualiza band_name en los eventos existentes cargados por el admin."""
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    from datetime import date as d
+    fixes = {
+        (d(2026,5,3),  "Uniclub"):                     "Bane + Stick To Your Guns",
+        (d(2026,5,9),  "Mamadera Bar"):                 "Expulsados, Mal Pasar, Quebraditos",
+        (d(2026,5,14), "Buenos Aires"):                 "The Chameleons",
+        (d(2026,5,21), "Movistar Arena"):               "Mon Laferte",
+        (d(2026,5,4),  "Buenos Aires"):                 "Six Feet Under + Swallow The Sun",
+        (d(2026,5,10), "Marquee Session"):              "Vader",
+        (d(2026,5,10), "Parque Sarmiento"):             "Korn",
+        (d(2026,5,15), "Groove"):                       "Groove Metal Fest Vol. 3",
+        (d(2026,5,17), "Teatro Flores"):                "Draconian",
+        (d(2026,5,17), "Uniclub"):                      "Cult of Fire",
+        (d(2026,5,22), "Uniclub"):                      "The Amity Affliction",
+        (d(2026,5,26), "Teatro Vorterix"):              "Drowning Pool",
+        (d(2026,5,29), "Arkham Multiespacio"):          "Buenos Aires Nu Metal Fest",
+        (d(2026,5,2),  "Buenos Aires"):                 "Gauchito Club",
+        (d(2026,5,14), "C Art Media"):                  "Portugal. The Man",
+        (d(2026,5,19), "Teatro Vorterix"):              "POGOFEST",
+        (d(2026,5,25), "C Art Media"):                  "Wolf Alice",
+        (d(2026,5,26), "Niceto Club"):                  "Horsegirl",
+        (d(2026,5,9),  "Museum Live"):                  "Smile Trap Sessions",
+        (d(2026,5,10), "Estadio Malvinas Argentinas"):  "Modo Diablo",
+        (d(2026,5,14), "Movistar Arena"):               "Ca7riel & Paco Amoroso",
+        (d(2026,6,6),  "Mole Club"):                    "Buenos Aires Nu Metal Fest MdP",
+        (d(2026,6,2),  "Uniclub"):                      "Tygers of Pan Tang",
+        (d(2026,6,19), "Marquee Session Live"):         "Masacre",
+        (d(2026,6,26), "Teatro Vorterix"):              "Drowning Pool",
+        (d(2026,6,12), "Movistar Arena"):               "Pulp",
+        (d(2026,6,17), "Niceto Club"):                  "Shame",
+        (d(2026,6,3),  "Movistar Arena"):               "Andres Calamaro",
+        (d(2026,6,4),  "Movistar Arena"):               "Soda Stereo",
+        (d(2026,6,6),  "Estadio Atenas"):               "Guasones",
+        (d(2026,6,12), "Club Aleman"):                  "WOS",
+        (d(2026,6,14), "Estadio Centro"):               "Las Pastillas del Abuelo",
+        (d(2026,6,20), "Garage Club"):                  "La Vela Puerca",
+        (d(2026,6,20), "Arena Sur"):                    "Nonpalidece",
+        (d(2026,6,25), "Movistar Arena"):               "Babasónicos",
+        (d(2026,6,24), "Uniclub"):                      "Redd Kross",
+    }
+
+    events = session.exec(select(Event)).all()
+    count = 0
+    for ev in events:
+        name = fixes.get((ev.date, ev.venue))
+        if name and not ev.band_name:
+            ev.band_name = name
+            session.add(ev)
+            count += 1
+
+    session.commit()
+    return {"ok": True, "updated": count}
 
 @app.get("/legal", response_class=HTMLResponse)
 async def legal_page(request: Request):

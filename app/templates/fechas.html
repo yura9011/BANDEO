@@ -160,8 +160,8 @@
                             {{ day }}
                         </div>
                         {% for ev in day_events[:3] %}
-                        <span class="event-pill" title="{{ ev.user.display_name }} — {{ ev.venue }}">
-                            {% if ev.time %}{{ ev.time }} · {% endif %}{{ ev.user.display_name }}
+                        <span class="event-pill" title="{{ ev.band_name or ev.user.display_name }} — {{ ev.venue }}">
+                            {% if ev.time %}{{ ev.time }} · {% endif %}{{ ev.band_name or ev.user.display_name }}
                         </span>
                         {% endfor %}
                         {% if day_events|length > 3 %}
@@ -203,7 +203,7 @@
                 {% for ev in evs %}
                 {
                     id: {{ ev.id }},
-                    band: {{ ev.user.display_name | tojson }},
+                    band: {{ (ev.band_name or ev.user.display_name) | tojson }},
                     venue: {{ ev.venue | tojson }},
                     address: {{ (ev.address or '') | tojson }},
                     city: {{ ev.city | tojson }},
