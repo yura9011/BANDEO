@@ -343,99 +343,86 @@ async def debug_env():
         db_url = db_url.split("@")[0].rsplit(":", 1)[0] + ":***@" + db_url.split("@")[1]
     return {"DATABASE_URL": db_url, "has_db": bool(os.environ.get("DATABASE_URL"))}
 
-@app.get("/admin/fix-band-names")
-async def fix_band_names(
+@app.get("/admin/seed-shows")
+async def seed_shows(
     admin_token: Optional[str] = Cookie(None),
     session: Session = Depends(get_session)
 ):
-    """Actualiza band_name en los eventos existentes cargados por el admin."""
     if admin_token != ADMIN_SECRET:
         return RedirectResponse(url="/admin/login", status_code=303)
 
     from datetime import date as d
-    fixes = {
-        (d(2026,5,3),  "Uniclub"):                     "Bane + Stick To Your Guns",
-        (d(2026,5,9),  "Mamadera Bar"):                 "Expulsados, Mal Pasar, Quebraditos",
-        (d(2026,5,14), "Buenos Aires"):                 "The Chameleons",
-        (d(2026,5,21), "Movistar Arena"):               "Mon Laferte",
-        (d(2026,5,4),  "Buenos Aires"):                 "Six Feet Under + Swallow The Sun",
-        (d(2026,5,10), "Marquee Session"):              "Vader",
-        (d(2026,5,10), "Parque Sarmiento"):             "Korn",
-        (d(2026,5,15), "Groove"):                       "Groove Metal Fest Vol. 3",
-        (d(2026,5,17), "Teatro Flores"):                "Draconian",
-        (d(2026,5,17), "Uniclub"):                      "Cult of Fire",
-        (d(2026,5,22), "Uniclub"):                      "The Amity Affliction",
-        (d(2026,5,26), "Teatro Vorterix"):              "Drowning Pool",
-        (d(2026,5,29), "Arkham Multiespacio"):          "Buenos Aires Nu Metal Fest",
-        (d(2026,5,2),  "Buenos Aires"):                 "Gauchito Club",
-        (d(2026,5,14), "C Art Media"):                  "Portugal. The Man",
-        (d(2026,5,19), "Teatro Vorterix"):              "POGOFEST",
-        (d(2026,5,25), "C Art Media"):                  "Wolf Alice",
-        (d(2026,5,26), "Niceto Club"):                  "Horsegirl",
-        (d(2026,5,9),  "Museum Live"):                  "Smile Trap Sessions",
-        (d(2026,5,10), "Estadio Malvinas Argentinas"):  "Modo Diablo",
-        (d(2026,5,14), "Movistar Arena"):               "Ca7riel & Paco Amoroso",
-        (d(2026,6,6),  "Mole Club"):                    "Buenos Aires Nu Metal Fest MdP",
-        (d(2026,6,2),  "Uniclub"):                      "Tygers of Pan Tang",
-        (d(2026,6,19), "Marquee Session Live"):         "Masacre",
-        (d(2026,6,26), "Teatro Vorterix"):              "Drowning Pool",
-        (d(2026,6,12), "Movistar Arena"):               "Pulp",
-        (d(2026,6,17), "Niceto Club"):                  "Shame",
-        (d(2026,6,3),  "Movistar Arena"):               "Andres Calamaro",
-        (d(2026,6,4),  "Movistar Arena"):               "Soda Stereo",
-        (d(2026,6,6),  "Estadio Atenas"):               "Guasones",
-        (d(2026,6,12), "Club Aleman"):                  "WOS",
-        (d(2026,6,14), "Estadio Centro"):               "Las Pastillas del Abuelo",
-        (d(2026,6,20), "Garage Club"):                  "La Vela Puerca",
-        (d(2026,6,20), "Arena Sur"):                    "Nonpalidece",
-        (d(2026,6,25), "Movistar Arena"):               "Babasónicos",
-        (d(2026,6,24), "Uniclub"):                      "Redd Kross",
-    }
 
-    events = session.exec(select(Event)).all()
+    shows = [
+        ("Bane + Stick To Your Guns",        d(2026,5,3),  "Uniclub",                     "Buenos Aires",  "hardcore, punk"),
+        ("Expulsados, Mal Pasar, Quebraditos",d(2026,5,9),  "Mamadera Bar",                "San Juan",      "punk"),
+        ("The Chameleons",                    d(2026,5,14), "Teatro Vorterix",              "Buenos Aires",  "post-punk"),
+        ("Mon Laferte",                       d(2026,5,21), "Movistar Arena",               "Buenos Aires",  "pop, rock"),
+        ("Six Feet Under + Swallow The Sun",  d(2026,5,4),  "Uniclub",                     "Buenos Aires",  "metal"),
+        ("Vader",                             d(2026,5,10), "Marquee Session",              "Buenos Aires",  "death metal"),
+        ("Korn",                              d(2026,5,10), "Parque Sarmiento",             "Buenos Aires",  "nu-metal"),
+        ("Groove Metal Fest Vol. 3",          d(2026,5,15), "Groove",                       "Buenos Aires",  "metal"),
+        ("Draconian",                         d(2026,5,17), "Teatro Flores",                "Buenos Aires",  "doom metal"),
+        ("Cult of Fire",                      d(2026,5,17), "Uniclub",                     "Buenos Aires",  "black metal"),
+        ("The Amity Affliction",              d(2026,5,22), "Uniclub",                     "Buenos Aires",  "metalcore"),
+        ("Drowning Pool",                     d(2026,5,26), "Teatro Vorterix",              "Buenos Aires",  "nu-metal"),
+        ("Buenos Aires Nu Metal Fest",        d(2026,5,29), "Arkham Multiespacio",          "Buenos Aires",  "nu-metal"),
+        ("Gauchito Club",                     d(2026,5,2),  "C Art Media",                 "Buenos Aires",  "indie"),
+        ("Portugal. The Man",                 d(2026,5,14), "C Art Media",                 "Buenos Aires",  "indie rock"),
+        ("POGOFEST",                          d(2026,5,19), "Teatro Vorterix",              "Buenos Aires",  "indie rock"),
+        ("Wolf Alice",                        d(2026,5,25), "C Art Media",                 "Buenos Aires",  "indie rock"),
+        ("Horsegirl",                         d(2026,5,26), "Niceto Club",                 "Buenos Aires",  "indie rock"),
+        ("Smile Trap Sessions",               d(2026,5,9),  "Museum Live",                 "Buenos Aires",  "trap"),
+        ("Modo Diablo",                       d(2026,5,10), "Estadio Malvinas Argentinas",  "Buenos Aires",  "trap"),
+        ("Ca7riel & Paco Amoroso",            d(2026,5,14), "Movistar Arena",               "Buenos Aires",  "trap, rap"),
+        ("Buenos Aires Nu Metal Fest MdP",    d(2026,6,6),  "Mole Club",                   "Mar del Plata", "nu-metal"),
+        ("Tygers of Pan Tang",                d(2026,6,2),  "Uniclub",                     "Buenos Aires",  "heavy metal"),
+        ("Masacre",                           d(2026,6,19), "Marquee Session Live",         "Buenos Aires",  "death metal"),
+        ("Drowning Pool",                     d(2026,6,26), "Teatro Vorterix",              "Buenos Aires",  "nu-metal"),
+        ("Pulp",                              d(2026,6,12), "Movistar Arena",               "Buenos Aires",  "indie rock, britpop"),
+        ("Shame",                             d(2026,6,17), "Niceto Club",                 "Buenos Aires",  "post-punk"),
+        ("Andres Calamaro",                   d(2026,6,3),  "Movistar Arena",               "Buenos Aires",  "rock"),
+        ("Soda Stereo",                       d(2026,6,4),  "Movistar Arena",               "Buenos Aires",  "rock"),
+        ("Guasones",                          d(2026,6,6),  "Estadio Atenas",              "La Plata",      "rock"),
+        ("WOS",                               d(2026,6,12), "Club Aleman",                 "Buenos Aires",  "rap, hip-hop"),
+        ("Las Pastillas del Abuelo",          d(2026,6,14), "Estadio Centro",              "Buenos Aires",  "rock"),
+        ("La Vela Puerca",                    d(2026,6,20), "Garage Club",                 "Buenos Aires",  "rock"),
+        ("Nonpalidece",                       d(2026,6,20), "Arena Sur",                   "Buenos Aires",  "reggae"),
+        ("Babasónicos",                       d(2026,6,25), "Movistar Arena",               "Buenos Aires",  "rock"),
+        ("Redd Kross",                        d(2026,6,24), "Uniclub",                     "Buenos Aires",  "rock"),
+    ]
+
+    admin_user = session.exec(
+        select(User).where(User.edit_token == "bandeo-admin-shows")
+    ).first()
+
+    if not admin_user:
+        admin_user = User(
+            display_name="Bandeo",
+            role="BANDA",
+            edit_token="bandeo-admin-shows",
+            status="approved"
+        )
+        session.add(admin_user)
+        session.commit()
+        session.refresh(admin_user)
+
     count = 0
-    for ev in events:
-        name = fixes.get((ev.date, ev.venue))
-        if name and not ev.band_name:
-            ev.band_name = name
-            session.add(ev)
-            count += 1
+    for band, dt, venue, city, genres in shows:
+        event = Event(
+            user_id=admin_user.id,
+            band_name=band,
+            date=dt,
+            venue=venue,
+            city=city,
+            details=genres,
+            status="approved"
+        )
+        session.add(event)
+        count += 1
 
     session.commit()
-    return {"ok": True, "updated": count}
-
-@app.get("/admin/debug-events")
-async def debug_events(
-    admin_token: Optional[str] = Cookie(None),
-    session: Session = Depends(get_session)
-):
-    if admin_token != ADMIN_SECRET:
-        return RedirectResponse(url="/admin/login", status_code=303)
-    events = session.exec(select(Event).limit(5)).all()
-    return {
-        "total": len(events),
-        "sample": [{"id": e.id, "date": str(e.date), "venue": e.venue, "band_name": e.band_name, "status": e.status} for e in events]
-    }
-
-@app.get("/admin/migrate")
-async def migrate(
-    admin_token: Optional[str] = Cookie(None),
-    session: Session = Depends(get_session)
-):
-    if admin_token != ADMIN_SECRET:
-        return RedirectResponse(url="/admin/login", status_code=303)
-    from sqlalchemy import text
-    from app.database import engine as db_engine
-    with db_engine.connect() as conn:
-        try:
-            conn.execute(text("ALTER TABLE event ADD COLUMN band_name VARCHAR"))
-            conn.commit()
-            return {"ok": True, "msg": "columna band_name agregada"}
-        except Exception as e:
-            conn.rollback()
-            if "already exists" in str(e):
-                return {"ok": True, "msg": "columna ya existia"}
-            return {"ok": False, "error": str(e)}
+    return {"ok": True, "loaded": count}
 
 @app.get("/legal", response_class=HTMLResponse)
 async def legal_page(request: Request):
