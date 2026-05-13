@@ -281,16 +281,19 @@
             }
 
             const countEl = document.getElementById('new-count');
-            countEl.textContent = newCount === 0 && seenCount > 0
-                ? 'Viste todos los perfiles.'
-                : `${newCount} perfil${newCount !== 1 ? 'es' : ''}`;
+            if (countEl) {
+                countEl.textContent = newCount === 0 && seenCount > 0
+                    ? 'Viste todos los perfiles.'
+                    : `${newCount} perfil${newCount !== 1 ? 'es' : ''}`;
+            }
         }
 
-        document.querySelectorAll('.note[data-id]').forEach(note => {
-            note.addEventListener('click', () => markSeen(note.dataset.id, note.dataset.name, note.dataset.city));
-        });
-
-        applySeenState();
+        if (document.querySelector('.note[data-id]')) {
+            document.querySelectorAll('.note[data-id]').forEach(note => {
+                note.addEventListener('click', () => markSeen(note.dataset.id, note.dataset.name, note.dataset.city));
+            });
+            applySeenState();
+        }
     </script>
 
 </body>
