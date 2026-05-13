@@ -404,6 +404,19 @@ async def fix_band_names(
     session.commit()
     return {"ok": True, "updated": count}
 
+@app.get("/admin/debug-events")
+async def debug_events(
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+    events = session.exec(select(Event).limit(5)).all()
+    return {
+        "total": len(events),
+        "sample": [{"id": e.id, "date": str(e.date), "venue": e.venue, "band_name": e.band_name, "status": e.status} for e in events]
+    }
+
 @app.get("/admin/migrate")
 async def migrate(
     admin_token: Optional[str] = Cookie(None),
