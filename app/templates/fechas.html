@@ -159,7 +159,7 @@
                     {% set all_events = [] %}
                     {% for day in range(1, 32) %}
                     {% for ev in events_by_day.get(day, []) %}
-                    <div class="show-item" id="show-{{ ev.id }}" onclick="selectDay({{ day }})">
+                    <div class="show-item" data-day="{{ day }}" onclick="selectDay({{ day }})">
                         <p class="text-xs font-medium mb-1" style="color:var(--muted)">{{ day }} de {{ month_name }}</p>
                         <p class="text-sm font-semibold leading-snug">{{ ev.band_name or ev.user.display_name }}</p>
                         <p class="text-xs mt-0.5" style="color:var(--muted)">{{ ev.venue }} · {{ ev.city }}</p>
@@ -188,29 +188,21 @@
         let selectedDay = null;
 
         function selectDay(day) {
-            // Desmarcar día anterior
             if (selectedDay) {
                 const prev = document.getElementById('day-' + selectedDay);
                 if (prev) prev.classList.remove('active');
             }
-
-            // Marcar día nuevo
             selectedDay = day;
             const el = document.getElementById('day-' + day);
             if (el) el.classList.add('active');
 
-            // Scroll a la lista del día
-            const shows = document.querySelectorAll('.show-item');
-            shows.forEach(s => s.classList.remove('highlighted'));
-
-            // Highlight shows de ese día
-            const EVENTS = {{ events_by_day | tojson }};
-            // buscar items por texto del día
-            shows.forEach(s => {
-                if (s.querySelector('p') && s.querySelector('p').textContent.startsWith(day + ' de')) {
-                    s.classList.add('highlighted');
-                    s.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
+            // Highlight y scroll en la lista
+            document.querySelectorAll('.show-item').forEach(s => {
+                s.classList.remove('highlighted');
+            });
+            document.querySelectorAll('.show-item[data-day="' + day + '"]').forEach(s => {
+                s.classList.add('highlighted');
+                s.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             });
         }
 
