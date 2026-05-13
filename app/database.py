@@ -1,22 +1,26 @@
 import os
+from urllib.parse import urlparse, parse_qs
 from sqlmodel import create_engine, SQLModel, Session
 from app.models.user import User, Profile, Post, Event
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-if not DATABASE_URL:
-    # fallback local unicamente
-    DATABASE_URL = "sqlite:///./bandeo.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./bandeo.db")
 
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    # Usar pg8000 como driver (pure Python, sin dependencias de sistema)
-    if "+pg8000" not in DATABASE_URL and "+psycopg2" not in DATABASE_URL:
-        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
-    engine = create_engine(DATABASE_URL)
+    parsed = urlparse(DATABASE_URL)
+    qs = parse_qs(parsed.query)
+    sslmode = qs.pop("sslmode", [None])[0]
+
+    clean_url = f"postgresql+psycopg2://{parsed.netloc}{parsed.path}"
+    if qs:
+        clean_url += "?" + "&".join(f"{k}={v[0]}" for k, v in qs.items())
+
+    connect_args = {}
+    if sslmode:
+        connect_args["sslmode"] = sslmode
+
+    engine = create_engine(clean_url, connect_args=connect_args)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
