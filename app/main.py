@@ -39,9 +39,16 @@ def require_admin(admin_token: Optional[str] = Cookie(None)):
     if admin_token != ADMIN_SECRET:
         raise HTTPException(status_code=303, headers={"Location": "/admin/login"})
 
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
+# Inicializar DB una sola vez (lazy, compatible con Vercel serverless)
+_db_initialized = False
+
+def ensure_db():
+    global _db_initialized
+    if not _db_initialized:
+        create_db_and_tables()
+        _db_initialized = True
+
+ensure_db()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
