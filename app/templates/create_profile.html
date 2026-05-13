@@ -1,107 +1,113 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Perfil - BANDEO</title>
+    <title>Publicar perfil — Bandeo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; }
+        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; }
+        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; }
+        body { background: var(--bg); color: var(--text); }
+        header { background: var(--header-bg); border-bottom: 1px solid var(--header-border); backdrop-filter: blur(12px); }
+        .pub-btn { background: var(--btn-bg); color: var(--btn-text); }
+        .field { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; padding: 12px 16px; width: 100%; font-size: 14px; transition: border-color 0.15s; }
+        .field:focus { outline: none; border-color: var(--text); }
+        .field::placeholder { color: var(--muted); }
+        label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+        details summary { font-size: 13px; color: var(--muted); cursor: pointer; padding: 8px 0; }
+        details summary:hover { color: var(--text); }
     </style>
+    <script>
+        const t = localStorage.getItem('bandeo_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        function setTheme(t) { document.documentElement.setAttribute('data-theme', t); localStorage.setItem('bandeo_theme', t); }
+    </script>
 </head>
-<body class="bg-white text-gray-900 min-h-screen">
-    
-    <!-- Header -->
-    <header class="border-b border-gray-200 py-6">
-        <div class="container mx-auto px-4">
-            <a href="/" class="text-2xl font-light tracking-wide hover:opacity-70">BANDEO</a>
-        </div>
-    </header>
+<body>
 
-    <div class="container mx-auto px-4 py-12 max-w-xl">
-        <h2 class="text-3xl font-light mb-2">Crear perfil</h2>
-        <p class="text-gray-500 mb-12">Completá tus datos para aparecer en las búsquedas</p>
+    {% set active = "directorio" %}
+    {% include "_header.html" %}
 
-        <form action="/create" method="post" class="space-y-6">
-            <!-- Rol -->
+    <main class="max-w-lg mx-auto px-6 py-14">
+
+        <h1 class="text-3xl font-bold tracking-tight mb-2">Publicar perfil</h1>
+        <p class="text-sm mb-12" style="color:var(--muted)">Completá tus datos para aparecer en el directorio.</p>
+
+        <form action="/create" method="post" class="space-y-5">
+
             <div>
-                <label class="block text-sm text-gray-600 mb-2">Tipo</label>
-                <select name="role" required class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
-                    <option value="MUSICO">Músico</option>
+                <label>Tipo</label>
+                <select name="role" required class="field">
+                    <option value="MUSICO">Musico</option>
                     <option value="BANDA">Banda</option>
                 </select>
             </div>
 
-            <!-- Nombre -->
             <div>
-                <label class="block text-sm text-gray-600 mb-2">Nombre</label>
-                <input type="text" name="display_name" required placeholder="Juan Pérez" 
-                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
-            </div>
-
-            <!-- Ciudad -->
-            <div>
-                <label class="block text-sm text-gray-600 mb-2">Ciudad</label>
-                <input type="text" name="city" required placeholder="Lanús" 
-                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
-            </div>
-
-            <!-- Instrumentos -->
-            <div>
-                <label class="block text-sm text-gray-600 mb-2">Instrumentos</label>
-                <input type="text" name="instruments" required placeholder="Bajo, Guitarra" 
-                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
-            </div>
-
-            <!-- Géneros -->
-            <div>
-                <label class="block text-sm text-gray-600 mb-2">Géneros</label>
-                <input type="text" name="genres" required placeholder="Rock, Blues" 
-                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
-            </div>
-
-            <!-- Bio -->
-            <div>
-                <label class="block text-sm text-gray-600 mb-2">Bio (opcional)</label>
-                <textarea name="bio" rows="3" placeholder="Contá un poco sobre vos..." 
-                          class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900"></textarea>
-            </div>
-
-            <!-- Contacto -->
-            <div>
-                <label class="block text-sm text-gray-600 mb-2">WhatsApp (opcional)</label>
-                <input type="text" name="phone" placeholder="1155667788" 
-                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+                <label>Nombre</label>
+                <input type="text" name="display_name" required placeholder="Juan Perez" class="field">
             </div>
 
             <div>
-                <label class="block text-sm text-gray-600 mb-2">Instagram (opcional)</label>
-                <input type="text" name="instagram_link" placeholder="@tuusuario" 
-                       class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+                <label>Ciudad</label>
+                <input type="text" name="city" required placeholder="Lanus" class="field">
             </div>
 
-            <!-- Links opcionales (colapsados) -->
-            <details class="text-sm text-gray-600">
-                <summary class="cursor-pointer hover:text-gray-900">Más opciones</summary>
+            <div>
+                <label>Instrumentos</label>
+                <input type="text" name="instruments" required placeholder="Bajo, Guitarra" class="field">
+            </div>
+
+            <div>
+                <label>Generos</label>
+                <input type="text" name="genres" required placeholder="Rock, Blues" class="field">
+            </div>
+
+            <div>
+                <label>Bio (opcional)</label>
+                <textarea name="bio" rows="3" placeholder="Conta un poco sobre vos..."
+                          class="field resize-none"></textarea>
+            </div>
+
+            <div>
+                <label>WhatsApp (opcional)</label>
+                <input type="text" name="phone" placeholder="1155667788" class="field">
+            </div>
+
+            <div>
+                <label>Instagram (opcional)</label>
+                <input type="text" name="instagram_link" placeholder="@tuusuario" class="field">
+            </div>
+
+            <details>
+                <summary>Mas opciones</summary>
                 <div class="mt-4 space-y-4">
                     <div>
-                        <label class="block text-sm text-gray-600 mb-2">YouTube</label>
-                        <textarea name="youtube_links" rows="2" placeholder="https://youtube.com/watch?v=..." 
-                                  class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900"></textarea>
+                        <label>YouTube</label>
+                        <textarea name="youtube_links" rows="2" placeholder="https://youtube.com/watch?v=..."
+                                  class="field resize-none"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-600 mb-2">Spotify</label>
-                        <input type="text" name="spotify_link" placeholder="https://open.spotify.com/artist/..." 
-                               class="w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-gray-900">
+                        <label>Spotify</label>
+                        <input type="text" name="spotify_link" placeholder="https://open.spotify.com/artist/..." class="field">
                     </div>
                 </div>
             </details>
 
-            <button type="submit" class="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded transition-colors">
-                Crear perfil
-            </button>
+            <div class="pt-2">
+                <button type="submit" class="pub-btn w-full py-3 rounded-full text-sm font-medium">
+                    Publicar perfil
+                </button>
+            </div>
+
         </form>
-    </div>
+    </main>
 
 </body>
 </html>
