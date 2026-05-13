@@ -6,3 +6,6 @@ sqlmodel==0.0.38
 aiofiles
 httpx
 python-dotenv
+psycopg2-binary
+pg8000
+

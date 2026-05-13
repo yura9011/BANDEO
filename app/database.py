@@ -11,9 +11,11 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    # PostgreSQL — asegurar que use el driver correcto
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    # Usar pg8000 como driver (pure Python, sin dependencias de sistema)
+    if "+pg8000" not in DATABASE_URL and "+psycopg2" not in DATABASE_URL:
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
     engine = create_engine(DATABASE_URL)
 
 def create_db_and_tables():
