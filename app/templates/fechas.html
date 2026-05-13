@@ -138,7 +138,7 @@
             </a>
         </div>
 
-        <div class="flex gap-8 items-start">
+        <div class="flex gap-6 items-start">
 
             <!-- Calendario -->
             <div class="flex-1 min-w-0 overflow-x-auto">
@@ -174,8 +174,8 @@
                 </div>
             </div>
 
-            <!-- Panel lateral -->
-            <div id="detail-panel" style="width:280px; flex-shrink:0;">
+            <!-- Panel lateral — solo en pantallas XL -->
+            <div id="detail-panel" style="width:240px; flex-shrink:0; display:none;">
                 <p class="text-xs uppercase tracking-widest font-medium mb-4" style="color:var(--muted)" id="panel-title">
                     Seleccioná un día
                 </p>
@@ -250,6 +250,18 @@
                 </div>
             `).join('');
         }
+
+        // Mostrar panel lateral solo en pantallas anchas
+        function updatePanelVisibility() {
+            const panel = document.getElementById('detail-panel');
+            if (window.innerWidth >= 1280) {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        updatePanelVisibility();
+        window.addEventListener('resize', updatePanelVisibility);
 
         // Mostrar hoy automáticamente si tiene eventos
         const todayDay = {{ today.day }};
