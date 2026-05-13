@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fechas — BANDEO</title>
+    <title>Fechas — Bandeo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
@@ -11,98 +11,77 @@
     <style>
         * { font-family: 'DM Sans', -apple-system, sans-serif; }
 
-        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; --day-hover:#f3f4f6; --today-bg:#111; --today-text:#fff; --dot:#111; }
-        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; --day-hover:#2d2b26; --today-bg:#e8e4dc; --today-text:#1a1814; --dot:#e8e4dc; }
-        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; --day-hover:#1a1a1a; --today-bg:#fff; --today-text:#000; --dot:#fff; }
+        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; --day-hover:#f3f4f6; --today-bg:#111; --today-text:#fff; }
+        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; --day-hover:#2d2b26; --today-bg:#e8e4dc; --today-text:#1a1814; }
+        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; --day-hover:#1a1a1a; --today-bg:#fff; --today-text:#000; }
 
-        body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+        body { background: var(--bg); color: var(--text); }
         header { background: var(--header-bg); border-bottom: 1px solid var(--header-border); backdrop-filter: blur(12px); }
         .pub-btn { background: var(--btn-bg); color: var(--btn-text); }
-        .pub-btn:hover { opacity: 0.85; }
 
-        /* ── CALENDARIO ──────────────────────────────────── */
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
             background: var(--card-border);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
         }
-
         .cal-header-cell {
             background: var(--card-bg);
-            padding: 10px 8px;
+            padding: 8px 4px;
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--muted);
         }
-
         .cal-day {
             background: var(--card-bg);
-            min-height: 110px;
-            padding: 8px;
-            vertical-align: top;
-            cursor: default;
+            min-height: 80px;
+            padding: 6px;
+            cursor: pointer;
             transition: background 0.15s;
-            position: relative;
         }
         .cal-day:hover { background: var(--day-hover); }
-        .cal-day.empty { background: var(--bg); opacity: 0.4; }
+        .cal-day.empty { background: var(--bg); opacity: 0.3; cursor: default; }
+        .cal-day.active { background: var(--day-hover); outline: 2px solid var(--text); outline-offset: -2px; }
 
         .day-number {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            width: 26px; height: 26px;
+            width: 22px; height: 22px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
-        .day-number.today {
-            background: var(--today-bg);
-            color: var(--today-text);
-        }
+        .day-number.today { background: var(--today-bg); color: var(--today-text); }
 
-        /* Eventos dentro del día */
         .event-pill {
-            font-size: 11px;
-            padding: 3px 6px;
-            border-radius: 4px;
-            margin-bottom: 3px;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-bottom: 2px;
             background: var(--card-border);
             color: var(--text);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            cursor: pointer;
-            transition: opacity 0.15s;
             display: block;
         }
-        .event-pill:hover { opacity: 0.75; }
 
-        /* ── PANEL LATERAL ───────────────────────────────── */
-        #detail-panel {
-            width: 280px;
-            flex-shrink: 0;
-            position: sticky;
-            top: 80px;
+        /* Lista lateral */
+        .show-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: opacity 0.15s;
         }
-
-        .event-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 12px;
-        }
-
-        /* Tema btns */
-        .theme-btn { width:16px; height:16px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:transform 0.15s; }
-        .theme-btn:hover { transform: scale(1.2); }
+        .show-item:hover { opacity: 0.7; }
+        .show-item:last-child { border-bottom: none; }
+        .show-item.highlighted { background: var(--day-hover); margin: 0 -12px; padding: 12px; border-radius: 8px; border-bottom: none; }
     </style>
     <script>
         const t = localStorage.getItem('bandeo_theme') || 'light';
@@ -115,57 +94,47 @@
     {% set active = "fechas" %}
     {% include "_header.html" %}
 
-    <main class="max-w-7xl mx-auto px-6 py-12">
+    <main class="max-w-7xl mx-auto px-6 py-10">
 
-        <!-- Título + nav de mes -->
-        <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-4">
+        <!-- Nav mes + botón -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
                 <a href="/fechas?year={{ prev_year }}&month={{ prev_month }}"
-                   class="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+                   class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors"
                    style="border:1px solid var(--card-border); color:var(--text)">←</a>
-
-                <h1 class="text-2xl font-bold tracking-tight">
-                    {{ month_name }} {{ year }}
-                </h1>
-
+                <h1 class="text-xl font-bold tracking-tight">{{ month_name }} {{ year }}</h1>
                 <a href="/fechas?year={{ next_year }}&month={{ next_month }}"
-                   class="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+                   class="w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors"
                    style="border:1px solid var(--card-border); color:var(--text)">→</a>
             </div>
-
-            <a href="/fechas/nueva" class="pub-btn text-sm px-4 py-2 rounded-full font-medium">
-                + Agregar fecha
-            </a>
+            <a href="/fechas/nueva" class="pub-btn text-sm px-4 py-2 rounded-full font-medium">+ Agregar fecha</a>
         </div>
 
-        <div class="flex gap-6 items-start">
+        <!-- Layout: calendario + lista -->
+        <div class="flex gap-8 items-start">
 
             <!-- Calendario -->
-            <div class="flex-1 min-w-0 overflow-x-auto">
-                <div class="cal-grid" style="min-width:700px">
-                    <!-- Cabecera días -->
+            <div class="flex-1 min-w-0">
+                <div class="cal-grid">
                     {% for day_name in ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"] %}
                     <div class="cal-header-cell">{{ day_name }}</div>
                     {% endfor %}
 
-                    <!-- Semanas -->
                     {% for week in cal %}
                     {% for day in week %}
                     {% if day == 0 %}
                     <div class="cal-day empty"></div>
                     {% else %}
                     {% set day_events = events_by_day.get(day, []) %}
-                    <div class="cal-day" onclick="showDay({{ day }})">
+                    <div class="cal-day" id="day-{{ day }}" onclick="selectDay({{ day }})">
                         <div class="day-number {{ 'today' if today.day == day and today.month == month and today.year == year else '' }}">
                             {{ day }}
                         </div>
-                        {% for ev in day_events[:3] %}
-                        <span class="event-pill" title="{{ ev.band_name or ev.user.display_name }} — {{ ev.venue }}">
-                            {% if ev.time %}{{ ev.time }} · {% endif %}{{ ev.band_name or ev.user.display_name }}
-                        </span>
+                        {% for ev in day_events[:2] %}
+                        <span class="event-pill">{{ ev.band_name or ev.user.display_name }}</span>
                         {% endfor %}
-                        {% if day_events|length > 3 %}
-                        <span class="text-[10px]" style="color:var(--muted)">+{{ day_events|length - 3 }} más</span>
+                        {% if day_events|length > 2 %}
+                        <span style="font-size:10px; color:var(--muted)">+{{ day_events|length - 2 }}</span>
                         {% endif %}
                     </div>
                     {% endif %}
@@ -174,18 +143,38 @@
                 </div>
             </div>
 
-            <!-- Panel lateral — solo en pantallas XL -->
-            <div id="detail-panel" style="width:240px; flex-shrink:0; display:none;">
-                <p class="text-xs uppercase tracking-widest font-medium mb-4" style="color:var(--muted)" id="panel-title">
-                    Seleccioná un día
-                </p>
-                <div id="panel-content">
-                    {% if events_by_day %}
-                    <p class="text-sm" style="color:var(--muted)">
-                        {{ events_by_day.values()|sum(start=[]) | list | length }}
-                        fecha{{ 's' if events_by_day.values()|sum(start=[]) | list | length != 1 }} este mes
+            <!-- Lista de shows -->
+            <div style="width:280px; flex-shrink:0; position:sticky; top:80px; max-height:calc(100vh - 120px); overflow-y:auto;">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs uppercase tracking-widest font-medium" style="color:var(--muted)" id="list-title">
+                        {% if events_by_day %}
+                        {{ events_by_day.values()|sum(start=[]) | list | length }} fechas este mes
+                        {% else %}
+                        Sin fechas este mes
+                        {% endif %}
                     </p>
-                    {% else %}
+                </div>
+
+                <div id="shows-list">
+                    {% set all_events = [] %}
+                    {% for day in range(1, 32) %}
+                    {% for ev in events_by_day.get(day, []) %}
+                    <div class="show-item" id="show-{{ ev.id }}" onclick="selectDay({{ day }})">
+                        <p class="text-xs font-medium mb-1" style="color:var(--muted)">{{ day }} de {{ month_name }}</p>
+                        <p class="text-sm font-semibold leading-snug">{{ ev.band_name or ev.user.display_name }}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--muted)">{{ ev.venue }} · {{ ev.city }}</p>
+                        {% if ev.time or ev.price %}
+                        <p class="text-xs mt-0.5" style="color:var(--muted)">
+                            {% if ev.time %}{{ ev.time }}{% endif %}
+                            {% if ev.time and ev.price %} · {% endif %}
+                            {% if ev.price %}{{ ev.price }}{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+
+                    {% if not events_by_day %}
                     <p class="text-sm" style="color:var(--muted)">No hay fechas este mes.</p>
                     <a href="/fechas/nueva" class="text-sm underline mt-2 block" style="color:var(--muted)">Agregá la primera</a>
                     {% endif %}
@@ -195,81 +184,42 @@
         </div>
     </main>
 
-    <!-- Datos de eventos para JS -->
     <script>
-        const EVENTS = {
-            {% for day, evs in events_by_day.items() %}
-            {{ day }}: [
-                {% for ev in evs %}
-                {
-                    id: {{ ev.id }},
-                    band: {{ (ev.band_name or ev.user.display_name) | tojson }},
-                    venue: {{ ev.venue | tojson }},
-                    address: {{ (ev.address or '') | tojson }},
-                    city: {{ ev.city | tojson }},
-                    time: {{ (ev.time or '') | tojson }},
-                    price: {{ (ev.price or '') | tojson }},
-                    details: {{ (ev.details or '') | tojson }},
-                    profile_id: {{ ev.user_id }},
-                },
-                {% endfor %}
-            ],
-            {% endfor %}
-        };
+        let selectedDay = null;
 
-        const MONTH_NAME = {{ month_name | tojson }};
-        const YEAR = {{ year }};
-
-        function showDay(day) {
-            const evs = EVENTS[day] || [];
-            const title = document.getElementById('panel-title');
-            const content = document.getElementById('panel-content');
-
-            title.textContent = `${day} de ${MONTH_NAME}`;
-
-            if (evs.length === 0) {
-                content.innerHTML = `<p style="color:var(--muted);font-size:14px">Sin fechas este día.</p>
-                    <a href="/fechas/nueva" style="color:var(--muted);font-size:13px;text-decoration:underline;display:block;margin-top:8px">Agregar fecha</a>`;
-                return;
+        function selectDay(day) {
+            // Desmarcar día anterior
+            if (selectedDay) {
+                const prev = document.getElementById('day-' + selectedDay);
+                if (prev) prev.classList.remove('active');
             }
 
-            content.innerHTML = evs.map(ev => `
-                <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:16px;margin-bottom:12px;">
-                    <a href="/profile/${ev.profile_id}" style="font-weight:600;font-size:15px;color:var(--text);text-decoration:none;display:block;margin-bottom:4px"
-                       onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                        ${ev.band}
-                    </a>
-                    <p style="font-size:13px;color:var(--text);margin-bottom:2px">${ev.venue}</p>
-                    ${ev.address ? `<p style="font-size:12px;color:var(--muted)">${ev.address}</p>` : ''}
-                    <p style="font-size:12px;color:var(--muted)">${ev.city}</p>
-                    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;">
-                        ${ev.time    ? `<span style="font-size:12px;background:var(--card-border);padding:2px 8px;border-radius:20px;color:var(--text)">${ev.time}</span>` : ''}
-                        ${ev.price   ? `<span style="font-size:12px;background:var(--card-border);padding:2px 8px;border-radius:20px;color:var(--text)">${ev.price}</span>` : ''}
-                    </div>
-                    ${ev.details ? `<p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">${ev.details}</p>` : ''}
-                </div>
-            `).join('');
+            // Marcar día nuevo
+            selectedDay = day;
+            const el = document.getElementById('day-' + day);
+            if (el) el.classList.add('active');
+
+            // Scroll a la lista del día
+            const shows = document.querySelectorAll('.show-item');
+            shows.forEach(s => s.classList.remove('highlighted'));
+
+            // Highlight shows de ese día
+            const EVENTS = {{ events_by_day | tojson }};
+            // buscar items por texto del día
+            shows.forEach(s => {
+                if (s.querySelector('p') && s.querySelector('p').textContent.startsWith(day + ' de')) {
+                    s.classList.add('highlighted');
+                    s.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
         }
 
-        // Mostrar panel lateral solo en pantallas anchas
-        function updatePanelVisibility() {
-            const panel = document.getElementById('detail-panel');
-            if (window.innerWidth >= 1280) {
-                panel.style.display = 'block';
-            } else {
-                panel.style.display = 'none';
-            }
-        }
-        updatePanelVisibility();
-        window.addEventListener('resize', updatePanelVisibility);
-
-        // Mostrar hoy automáticamente si tiene eventos
-        const todayDay = {{ today.day }};
-        const todayMonth = {{ today.month }};
-        const todayYear = {{ today.year }};
-        if (todayMonth === {{ month }} && todayYear === {{ year }} && EVENTS[todayDay]) {
-            showDay(todayDay);
-        }
+        // Seleccionar hoy si tiene eventos
+        {% if today.month == month and today.year == year %}
+        {% if events_by_day.get(today.day) %}
+        selectDay({{ today.day }});
+        {% endif %}
+        {% endif %}
     </script>
 
     {% include "_footer.html" %}
