@@ -26,9 +26,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ADMIN_USER     = os.getenv("ADMIN_USER", "admin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "cambiame123")
-ADMIN_SECRET   = os.getenv("ADMIN_SECRET", "bandeo-session-secret-2026")
+ADMIN_USER     = os.getenv("ADMIN_USER")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_SECRET   = os.getenv("ADMIN_SECRET")
 
 app = FastAPI(title="BANDEO")
 
