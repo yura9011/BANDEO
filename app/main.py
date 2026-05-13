@@ -29,11 +29,9 @@ def on_startup():
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
-templates.env.globals.update(
-    extract_youtube_id=extract_youtube_id,
-    generate_whatsapp_link=generate_whatsapp_link,
-    normalize_instagram_link=normalize_instagram_link,
-)
+templates.env.globals["extract_youtube_id"] = extract_youtube_id
+templates.env.globals["generate_whatsapp_link"] = generate_whatsapp_link
+templates.env.globals["normalize_instagram_link"] = normalize_instagram_link
 
 # ── DIRECTORIO ────────────────────────────────────────────────────────────────
 
