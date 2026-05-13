@@ -141,8 +141,8 @@
         <div class="flex gap-8 items-start">
 
             <!-- Calendario -->
-            <div class="flex-1 min-w-0">
-                <div class="cal-grid">
+            <div class="flex-1 min-w-0 overflow-x-auto">
+                <div class="cal-grid" style="min-width:700px">
                     <!-- Cabecera días -->
                     {% for day_name in ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"] %}
                     <div class="cal-header-cell">{{ day_name }}</div>
