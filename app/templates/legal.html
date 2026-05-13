@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso legal — Bandeo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'DM Sans', -apple-system, sans-serif; }
+        [data-theme="light"]   { --bg:#F5F4F0; --header-bg:rgba(255,255,255,0.85); --header-border:#e5e7eb; --text:#111; --muted:#9ca3af; --btn-bg:#111; --btn-text:#fff; --card-bg:#fff; --card-border:#e5e7eb; }
+        [data-theme="dark"]    { --bg:#1a1814; --header-bg:rgba(26,24,20,0.9);     --header-border:#2d2b26; --text:#e8e4dc; --muted:#6b6760; --btn-bg:#e8e4dc; --btn-text:#1a1814; --card-bg:#242018; --card-border:#2d2b26; }
+        [data-theme="contrast"]{ --bg:#000;    --header-bg:rgba(0,0,0,0.95);       --header-border:#222;    --text:#fff;    --muted:#555;    --btn-bg:#fff;    --btn-text:#000;    --card-bg:#111; --card-border:#333; }
+        body { background: var(--bg); color: var(--text); }
+        header { background: var(--header-bg); border-bottom: 1px solid var(--header-border); backdrop-filter: blur(12px); }
+        .pub-btn { background: var(--btn-bg); color: var(--btn-text); }
+        h2 { font-size: 15px; font-weight: 600; margin-bottom: 8px; margin-top: 32px; }
+        p, li { font-size: 14px; line-height: 1.7; color: var(--muted); }
+        a { color: var(--text); text-decoration: underline; }
+    </style>
+    <script>
+        const t = localStorage.getItem('bandeo_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        function setTheme(t) { document.documentElement.setAttribute('data-theme', t); localStorage.setItem('bandeo_theme', t); }
+    </script>
+</head>
+<body>
+
+    {% set active = "" %}
+    {% include "_header.html" %}
+
+    <main class="max-w-2xl mx-auto px-6 py-14">
+
+        <h1 class="text-3xl font-bold tracking-tight mb-2">Aviso legal</h1>
+        <p class="text-sm mb-12" style="color:var(--muted)">Ultima actualizacion: mayo 2026</p>
+
+        <h2>Que es Bandeo</h2>
+        <p>
+            Bandeo es un directorio publico de musicos y bandas. Permite publicar un perfil con datos de contacto
+            y encontrar otros musicos en la misma zona. No es una red social, no tiene sistema de mensajeria interna
+            ni almacena contenido multimedia propio.
+        </p>
+
+        <h2>Que datos se guardan</h2>
+        <p>Al crear un perfil, se guardan los siguientes datos:</p>
+        <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>Nombre o nombre artistico</li>
+            <li>Ciudad</li>
+            <li>Instrumentos y generos musicales</li>
+            <li>Biografia (opcional)</li>
+            <li>Numero de telefono / WhatsApp (opcional)</li>
+            <li>Usuario de Instagram (opcional)</li>
+            <li>Links a YouTube y Spotify (opcional)</li>
+        </ul>
+
+        <h2>Estos datos son publicos</h2>
+        <p>
+            Todo lo que publiques en Bandeo es visible para cualquier persona que visite el sitio,
+            sin necesidad de registrarse. No publiques informacion que no quieras que sea publica.
+        </p>
+
+        <h2>Como se usa la informacion</h2>
+        <p>
+            Los datos se usan unicamente para mostrar tu perfil en el directorio y en los resultados de busqueda.
+            No se comparten con terceros, no se usan para publicidad y no se venden.
+        </p>
+
+        <h2>Como eliminar tu perfil</h2>
+        <p>
+            Para eliminar tu perfil y todos tus datos del sitio, escribi a
+            <a href="mailto:forma.digital.ar@gmail.com">forma.digital.ar@gmail.com</a>
+            con el asunto "Eliminar perfil" e indicando tu nombre tal como aparece en el directorio.
+            Lo procesamos en menos de 48 horas.
+        </p>
+
+        <h2>Ley aplicable</h2>
+        <p>
+            Este sitio opera bajo la legislacion argentina. Los datos personales estan protegidos por la
+            Ley 25.326 de Proteccion de Datos Personales de la Republica Argentina.
+        </p>
+
+        <h2>Contacto</h2>
+        <p>
+            Para cualquier consulta sobre privacidad o datos:
+            <a href="mailto:forma.digital.ar@gmail.com">forma.digital.ar@gmail.com</a>
+        </p>
+
+    </main>
+
+</body>
+</html>

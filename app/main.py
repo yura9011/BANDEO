@@ -304,5 +304,9 @@ async def crear_fecha(
         "request": request, "user": user, "event": event
     })
 
+@app.get("/legal", response_class=HTMLResponse)
+async def legal_page(request: Request):
+    return templates.TemplateResponse("legal.html", {"request": request})
+
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
