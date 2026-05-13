@@ -29,6 +29,7 @@ def on_startup():
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+templates.env.cache = {}  # deshabilitar cache para evitar bug con globals
 templates.env.globals["extract_youtube_id"] = extract_youtube_id
 templates.env.globals["generate_whatsapp_link"] = generate_whatsapp_link
 templates.env.globals["normalize_instagram_link"] = normalize_instagram_link
