@@ -411,20 +411,18 @@ async def migrate(
 ):
     if admin_token != ADMIN_SECRET:
         return RedirectResponse(url="/admin/login", status_code=303)
-    try:
-        session.exec(select(func.count()).select_from(
-            __import__('sqlalchemy').text("SELECT 1 FROM event WHERE band_name IS NOT NULL LIMIT 1")
-        ))
-        return {"ok": True, "msg": "columna ya existe"}
-    except Exception:
-        pass
-    try:
-        from sqlalchemy import text
-        session.exec(text("ALTER TABLE event ADD COLUMN band_name VARCHAR"))
-        session.commit()
-        return {"ok": True, "msg": "columna band_name agregada"}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+    from sqlalchemy import text
+    from app.database import engine as db_engine
+    with db_engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE event ADD COLUMN band_name VARCHAR"))
+            conn.commit()
+            return {"ok": True, "msg": "columna band_name agregada"}
+        except Exception as e:
+            conn.rollback()
+            if "already exists" in str(e):
+                return {"ok": True, "msg": "columna ya existia"}
+            return {"ok": False, "error": str(e)}
 
 @app.get("/legal", response_class=HTMLResponse)
 async def legal_page(request: Request):
