@@ -404,6 +404,28 @@ async def fix_band_names(
     session.commit()
     return {"ok": True, "updated": count}
 
+@app.get("/admin/migrate")
+async def migrate(
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+    try:
+        session.exec(select(func.count()).select_from(
+            __import__('sqlalchemy').text("SELECT 1 FROM event WHERE band_name IS NOT NULL LIMIT 1")
+        ))
+        return {"ok": True, "msg": "columna ya existe"}
+    except Exception:
+        pass
+    try:
+        from sqlalchemy import text
+        session.exec(text("ALTER TABLE event ADD COLUMN band_name VARCHAR"))
+        session.commit()
+        return {"ok": True, "msg": "columna band_name agregada"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
 @app.get("/legal", response_class=HTMLResponse)
 async def legal_page(request: Request):
     return templates.TemplateResponse("legal.html", {"request": request})
