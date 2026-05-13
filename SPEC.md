@@ -70,3 +70,25 @@ Ver `.gsd/STACK.md`
 - [ ] Alguien puede encontrar un músico y contactarlo por WhatsApp
 - [ ] Funciona en celular
 - [ ] Está deployado y accesible públicamente
+
+---
+
+## Reglas de desarrollo
+
+### Cambios de schema
+Antes de agregar cualquier campo nuevo a un modelo:
+1. Verificar si la tabla ya existe en Neon
+2. Si existe, crear ruta `/admin/migrate` con `ALTER TABLE` explícito
+3. Deployar la migración primero, verificar que funciona
+4. Recien despues deployar el código que usa el campo nuevo
+
+### Cambios de dependencias
+Antes de agregar un nuevo driver o librería:
+1. Verificar que esté disponible en el entorno de Vercel
+2. Testear localmente con `pip install` limpio
+3. Documentar en STATE.md si hay restricciones
+
+### Credenciales
+- Nunca en el código
+- Nunca en el repo
+- Solo en Vercel dashboard y en .env local (ignorado por git)
