@@ -325,6 +325,15 @@ async def crear_fecha(
         "request": request, "user": user, "event": event
     })
 
+@app.get("/debug-env")
+async def debug_env():
+    """Temporal — verificar variables de entorno en Vercel. Borrar después."""
+    db_url = os.environ.get("DATABASE_URL", "NO ENCONTRADA")
+    # Ocultar la contraseña
+    if "@" in db_url:
+        db_url = db_url.split("@")[0].rsplit(":", 1)[0] + ":***@" + db_url.split("@")[1]
+    return {"DATABASE_URL": db_url, "has_db": bool(os.environ.get("DATABASE_URL"))}
+
 @app.get("/legal", response_class=HTMLResponse)
 async def legal_page(request: Request):
     return templates.TemplateResponse("legal.html", {"request": request})
