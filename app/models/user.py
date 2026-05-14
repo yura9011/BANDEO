@@ -10,7 +10,7 @@ class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     edit_token: str = Field(unique=True, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    status: str = Field(default="pending")  # pending | approved | rejected
+    status: str = Field(default="approved")  # pending | approved | rejected
     profile: "Profile" = Relationship(back_populates="user")
     posts: List["Post"] = Relationship(back_populates="user")
     events: List["Event"] = Relationship(back_populates="user")
@@ -35,7 +35,7 @@ class Post(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
     content: str
-    status: str = Field(default="pending")  # pending | approved | rejected
+    status: str = Field(default="approved")  # pending | approved | rejected
     created_at: datetime = Field(default_factory=datetime.utcnow)
     user: User = Relationship(back_populates="posts")
 
@@ -50,6 +50,6 @@ class Event(SQLModel, table=True):
     city: str
     price: Optional[str] = None
     details: Optional[str] = None
-    status: str = Field(default="pending")
+    status: str = Field(default="approved")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     user: User = Relationship(back_populates="events")

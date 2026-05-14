@@ -356,14 +356,19 @@ async def migrate_route(
         with engine.connect() as conn:
             if db_type == "postgresql":
                 conn.execute(sa_text("ALTER TABLE profile ADD COLUMN IF NOT EXISTS photo_url TEXT;"))
+                conn.execute(sa_text("UPDATE \"user\" SET status = 'approved' WHERE status = 'pending';"))
+                conn.execute(sa_text("UPDATE post SET status = 'approved' WHERE status = 'pending';"))
+                conn.execute(sa_text("UPDATE event SET status = 'approved' WHERE status = 'pending';"))
             else:
-                # SQLite no soporta IF NOT EXISTS para columnas
                 try:
                     conn.execute(sa_text("ALTER TABLE profile ADD COLUMN photo_url TEXT;"))
                 except Exception:
-                    pass  # ya existe
+                    pass
+                conn.execute(sa_text("UPDATE \"user\" SET status = 'approved' WHERE status = 'pending';"))
+                conn.execute(sa_text("UPDATE post SET status = 'approved' WHERE status = 'pending';"))
+                conn.execute(sa_text("UPDATE event SET status = 'approved' WHERE status = 'pending';"))
             conn.commit()
-        results.append("OK: columna photo_url agregada a profile")
+        results.append("OK: columna photo_url + status actualizados")
     except Exception as e:
         results.append(f"ERROR: {e}")
 
