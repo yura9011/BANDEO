@@ -6,9 +6,9 @@ Directorio público de músicos y bandas. Sin fricción: entrás, ves perfiles, 
 
 ---
 
-## Milestone 1 — Directorio MVP 🟢 En curso
+## Milestone 1 — Directorio MVP 🟢 En curso (pre-lanzamiento)
 
-**Objetivo:** Que alguien pueda publicar su perfil y ser encontrado.
+**Objetivo:** Que alguien pueda publicar su perfil con foto y ser encontrado.
 
 - ✅ Directorio público con grid de perfiles
 - ✅ Crear perfil sin registro (edit token)
@@ -16,8 +16,11 @@ Directorio público de músicos y bandas. Sin fricción: entrás, ves perfiles, 
 - ✅ Contacto directo: WhatsApp, Instagram, Spotify
 - ✅ Videos de YouTube embebidos
 - ✅ Tablón de novedades de bandas (`/bandas`)
-- [ ] Foto de perfil
-- [ ] Deploy público
+- ✅ Calendario de fechas (`/fechas`)
+- ✅ Deploy público (Vercel + Neon)
+- ✅ Perfiles visibles sin moderación
+- ✅ Sin autenticación, sin chat, sin ratings
+- 🔄 **Foto de perfil** — URL externa + placeholder genérico (EN PLANIFICACIÓN)
 
 ---
 
@@ -47,3 +50,5 @@ Directorio público de músicos y bandas. Sin fricción: entrás, ves perfiles, 
 - ~~Sistema de puntuación~~ → demasiado complejo para arrancar
 - ~~Registro con email/password~~ → edit token es suficiente
 - ~~Buscador en landing~~ → sin volumen no tiene sentido
+- ~~Fotos subidas al servidor~~ → URL externa
+- ~~Dominio propio~~ → `*.vercel.app` por ahora
