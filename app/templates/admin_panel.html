@@ -130,7 +130,7 @@
                     <p class="text-xs text-gray-400 mt-1">{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <form method="post" action="/admin/delete/user/{{ user.id }}" onsubmit="return confirm('Borrar {{ user.display_name }}?')">
+                    <form method="post" action="/admin/delete/user/{{ user.id }}">
                         <button type="submit" class="btn-reject">Borrar</button>
                     </form>
                 </div>
