@@ -487,30 +487,38 @@ async def admin_delete(
     admin_token: Optional[str] = Cookie(None),
     session: Session = Depends(get_session)
 ):
+    error = None
     if admin_token != ADMIN_SECRET:
         return RedirectResponse(url="/admin/login", status_code=303)
 
-    if entity == "user":
-        obj = session.get(User, id)
-        if obj:
-            # Borrar perfil, posts y eventos asociados
-            profile = session.exec(select(Profile).where(Profile.user_id == id)).first()
-            if profile: session.delete(profile)
-            posts = session.exec(select(Post).where(Post.user_id == id)).all()
-            for p in posts: session.delete(p)
-            events = session.exec(select(Event).where(Event.user_id == id)).all()
-            for e in events: session.delete(e)
-            session.delete(obj)
-    elif entity == "post":
-        obj = session.get(Post, id)
-        if obj: session.delete(obj)
-    elif entity == "event":
-        obj = session.get(Event, id)
-        if obj: session.delete(obj)
-    else:
-        raise HTTPException(status_code=400)
+    try:
+        if entity == "user":
+            obj = session.get(User, id)
+            if obj:
+                profile = session.exec(select(Profile).where(Profile.user_id == id)).first()
+                if profile: session.delete(profile)
+                posts = session.exec(select(Post).where(Post.user_id == id)).all()
+                for p in posts: session.delete(p)
+                events = session.exec(select(Event).where(Event.user_id == id)).all()
+                for e in events: session.delete(e)
+                session.delete(obj)
+        elif entity == "post":
+            obj = session.get(Post, id)
+            if obj: session.delete(obj)
+        elif entity == "event":
+            obj = session.get(Event, id)
+            if obj: session.delete(obj)
+        else:
+            error = f"Entidad invalida: {entity}"
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        error = str(e)
 
-    session.commit()
+    if error:
+        return templates.TemplateResponse("admin_message.html", {
+            "request": request, "message": f"Error: {error}"
+        })
     return RedirectResponse(url="/admin", status_code=303)
 
 @app.post("/admin/reject/{entity}/{id}", response_class=HTMLResponse)
