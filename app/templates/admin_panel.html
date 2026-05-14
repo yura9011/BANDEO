@@ -108,6 +108,37 @@
         </div>
         {% endif %}
 
+        <!-- Perfiles aprobados -->
+        {% if approved_users_list %}
+        <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <p class="section-title">Perfiles aprobados ({{ approved_users_list|length }})</p>
+            {% for user in approved_users_list %}
+            <div class="item-row">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <a href="/profile/{{ user.id }}" target="_blank"
+                           class="font-semibold text-sm hover:underline">{{ user.display_name }}</a>
+                        <span class="badge-approved">{{ user.role }}</span>
+                    </div>
+                    {% if user.profile %}
+                    <p class="text-xs text-gray-500">
+                        {{ user.profile.city }} —
+                        {{ user.profile.instruments }} —
+                        {{ user.profile.genres }}
+                    </p>
+                    {% endif %}
+                    <p class="text-xs text-gray-400 mt-1">{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <form method="post" action="/admin/delete/user/{{ user.id }}" onsubmit="return confirm('Borrar {{ user.display_name }}?')">
+                        <button type="submit" class="btn-reject">Borrar</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Posts pendientes -->
         {% if pending_posts %}
         <div class="bg-white border border-gray-200 rounded-xl p-6">

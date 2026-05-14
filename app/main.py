@@ -438,6 +438,11 @@ async def admin_panel(
     pending_post_list  = session.exec(select(Post).where(Post.status == "pending").order_by(Post.created_at.desc())).all()
     pending_event_list = session.exec(select(Event).where(Event.status == "pending").order_by(Event.created_at.desc())).all()
 
+    # Todos los usuarios aprobados
+    approved_user_list = session.exec(
+        select(User).where(User.status == "approved").order_by(User.created_at.desc())
+    ).all()
+
     return templates.TemplateResponse("admin_panel.html", {
         "request": request,
         "stats": {
@@ -448,6 +453,7 @@ async def admin_panel(
         "pending_users": pending_user_list,
         "pending_posts": pending_post_list,
         "pending_events": pending_event_list,
+        "approved_users_list": approved_user_list,
     })
 
 @app.post("/admin/approve/{entity}/{id}", response_class=HTMLResponse)
@@ -473,6 +479,38 @@ async def admin_approve(
         session.add(obj)
         session.commit()
 
+    return RedirectResponse(url="/admin", status_code=303)
+
+@app.post("/admin/delete/{entity}/{id}", response_class=HTMLResponse)
+async def admin_delete(
+    entity: str, id: int,
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    if entity == "user":
+        obj = session.get(User, id)
+        if obj:
+            # Borrar perfil, posts y eventos asociados
+            profile = session.exec(select(Profile).where(Profile.user_id == id)).first()
+            if profile: session.delete(profile)
+            posts = session.exec(select(Post).where(Post.user_id == id)).all()
+            for p in posts: session.delete(p)
+            events = session.exec(select(Event).where(Event.user_id == id)).all()
+            for e in events: session.delete(e)
+            session.delete(obj)
+    elif entity == "post":
+        obj = session.get(Post, id)
+        if obj: session.delete(obj)
+    elif entity == "event":
+        obj = session.get(Event, id)
+        if obj: session.delete(obj)
+    else:
+        raise HTTPException(status_code=400)
+
+    session.commit()
     return RedirectResponse(url="/admin", status_code=303)
 
 @app.post("/admin/reject/{entity}/{id}", response_class=HTMLResponse)
