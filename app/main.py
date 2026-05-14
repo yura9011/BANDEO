@@ -85,6 +85,7 @@ async def create_profile(
     phone: Optional[str] = Form(None),
     youtube_links: Optional[str] = Form(None),
     spotify_link: Optional[str] = Form(None),
+    photo_url: Optional[str] = Form(None),
     instagram_link: Optional[str] = Form(None),
     session: Session = Depends(get_session)
 ):
@@ -116,6 +117,7 @@ async def create_profile(
         phone=clean_phone_number(phone),
         youtube_links=youtube_links.strip() if youtube_links else None,
         spotify_link=spotify_link.strip() if spotify_link else None,
+        photo_url=photo_url.strip() if photo_url else None,
         instagram_link=instagram_link.strip() if instagram_link else None,
     )
     session.add(new_profile)
@@ -146,6 +148,7 @@ async def update_profile(
     instruments: str = Form(...),
     genres: str = Form(...),
     bio: Optional[str] = Form(None),
+    photo_url: Optional[str] = Form(None),
     phone: Optional[str] = Form(None),
     youtube_links: Optional[str] = Form(None),
     spotify_link: Optional[str] = Form(None),
@@ -169,6 +172,7 @@ async def update_profile(
         profile.instruments = normalize_text_list(instruments)
         profile.genres = normalize_text_list(genres)
         profile.bio = bio.strip() if bio else None
+        profile.photo_url = photo_url.strip() if photo_url else None
         profile.phone = clean_phone_number(phone)
         profile.youtube_links = youtube_links.strip() if youtube_links else None
         profile.spotify_link = spotify_link.strip() if spotify_link else None
