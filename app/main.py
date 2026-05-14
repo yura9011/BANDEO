@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select, func
-from app.database import create_db_and_tables, get_session
+from app.database import create_db_and_tables, get_session, engine, DATABASE_URL
 from app.models.user import User, Profile, Post, Event
 from app.utils import (
     get_coordinates,
@@ -23,6 +23,7 @@ import os
 import secrets
 from datetime import date, datetime
 from dotenv import load_dotenv
+from sqlalchemy import text as sa_text
 
 load_dotenv()
 
@@ -335,8 +336,6 @@ async def crear_fecha(
     })
 
 # ── MIGRACIONES ───────────────────────────────────────────────────────────────
-
-from sqlalchemy import text as sa_text
 
 @app.get("/admin/migrate", response_class=HTMLResponse)
 async def migrate_route(
