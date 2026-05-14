@@ -28,6 +28,7 @@ class Profile(SQLModel, table=True):
     youtube_links: Optional[str] = None
     spotify_link: Optional[str] = None
     instagram_link: Optional[str] = None
+    photo_url: Optional[str] = None
     user: User = Relationship(back_populates="profile")
 
 class Post(SQLModel, table=True):
