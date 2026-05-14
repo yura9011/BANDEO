@@ -13,7 +13,7 @@ else:
     # y forzar psycopg2 como dialecto explícito
     clean_url = f"postgresql+psycopg2://{parsed.netloc}{parsed.path}"
     # sslmode=require es el único param que psycopg2.connect() acepta via connect_args
-    engine = create_engine(clean_url, connect_args={"sslmode": "require"})
+    engine = create_engine(clean_url, connect_args={"sslmode": "require"}, pool_pre_ping=True, pool_recycle=300)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
