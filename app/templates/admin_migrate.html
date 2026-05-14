@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migracion — BANDEO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-8">
+    <h1 class="text-xl font-bold mb-4">Migracion de DB</h1>
+    <p class="text-sm mb-4">Tipo: <span class="font-mono">{{ db_type }}</span></p>
+    <ul class="space-y-2">
+        {% for r in results %}
+        <li class="font-mono text-sm {{ 'text-green-400' if r.startswith('OK') else 'text-red-400' }}">{{ r }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/admin" class="mt-6 inline-block text-sm underline">Volver al admin</a>
+</body>
+</html>

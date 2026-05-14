@@ -334,6 +334,40 @@ async def crear_fecha(
         "request": request, "user": user, "event": event
     })
 
+# ── MIGRACIONES ───────────────────────────────────────────────────────────────
+
+from sqlalchemy import text as sa_text
+
+@app.get("/admin/migrate", response_class=HTMLResponse)
+async def migrate_route(
+    request: Request,
+    admin_token: Optional[str] = Cookie(None),
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    results = []
+    db_type = "sqlite" if DATABASE_URL.startswith("sqlite") else "postgresql"
+
+    try:
+        with engine.connect() as conn:
+            if db_type == "postgresql":
+                conn.execute(sa_text("ALTER TABLE profile ADD COLUMN IF NOT EXISTS photo_url TEXT;"))
+            else:
+                # SQLite no soporta IF NOT EXISTS para columnas
+                try:
+                    conn.execute(sa_text("ALTER TABLE profile ADD COLUMN photo_url TEXT;"))
+                except Exception:
+                    pass  # ya existe
+            conn.commit()
+        results.append("OK: columna photo_url agregada a profile")
+    except Exception as e:
+        results.append(f"ERROR: {e}")
+
+    return templates.TemplateResponse("admin_migrate.html", {
+        "request": request, "results": results, "db_type": db_type
+    })
+
 @app.get("/debug-env")
 async def debug_env():
     """Temporal — verificar variables de entorno en Vercel. Borrar después."""
