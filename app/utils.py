@@ -130,8 +130,8 @@ def normalize_instagram_link(username_or_url: str) -> str:
 
 def normalize_instagram_handle(username_or_url: str) -> Optional[str]:
     """
-    Extrae un handle valido de Instagram desde @usuario, usuario plano o URL.
-    Ignora texto largo que no parezca un usuario de Instagram.
+    Extrae un handle valido desde @usuario, usuario plano o URL de Instagram.
+    No interpreta texto libre como usuario para no ocultar contenido cargado.
     """
     if not username_or_url:
         return None
@@ -144,11 +144,23 @@ def normalize_instagram_handle(username_or_url: str) -> Optional[str]:
     if url_match:
         return _clean_instagram_handle(url_match.group(1))
 
-    handle_match = re.search(r"@([A-Za-z0-9._]{1,30})", value)
-    if handle_match:
-        return _clean_instagram_handle(handle_match.group(1))
+    if value.startswith("@"):
+        return _clean_instagram_handle(value[1:])
 
     return _clean_instagram_handle(value)
+
+def clean_instagram_input(username_or_url: str) -> Optional[str]:
+    """
+    Guarda handles normalizados sin descartar texto libre existente.
+    """
+    if not username_or_url:
+        return None
+
+    value = username_or_url.strip()
+    if not value:
+        return None
+
+    return normalize_instagram_handle(value) or value
 
 def format_instagram_label(username_or_url: str) -> str:
     """
