@@ -123,16 +123,45 @@ def normalize_instagram_link(username_or_url: str) -> str:
     """
     Normaliza un username o URL de Instagram a formato completo.
     """
-    if not username_or_url:
+    username = normalize_instagram_handle(username_or_url)
+    if not username:
         return ""
-    
-    username_or_url = username_or_url.strip()
-    
-    if username_or_url.startswith("http"):
-        return username_or_url
-    
-    username = username_or_url.replace("@", "")
     return f"https://instagram.com/{username}"
+
+def normalize_instagram_handle(username_or_url: str) -> Optional[str]:
+    """
+    Extrae un handle valido de Instagram desde @usuario, usuario plano o URL.
+    Ignora texto largo que no parezca un usuario de Instagram.
+    """
+    if not username_or_url:
+        return None
+
+    value = username_or_url.strip()
+    if not value:
+        return None
+
+    url_match = re.search(r"instagram\.com/([A-Za-z0-9._]{1,30})", value, re.IGNORECASE)
+    if url_match:
+        return _clean_instagram_handle(url_match.group(1))
+
+    handle_match = re.search(r"@([A-Za-z0-9._]{1,30})", value)
+    if handle_match:
+        return _clean_instagram_handle(handle_match.group(1))
+
+    return _clean_instagram_handle(value)
+
+def format_instagram_label(username_or_url: str) -> str:
+    """
+    Devuelve el texto corto que se muestra en la tarjeta de contacto.
+    """
+    username = normalize_instagram_handle(username_or_url)
+    return f"@{username}" if username else ""
+
+def _clean_instagram_handle(username: str) -> Optional[str]:
+    username = username.strip().strip("/?#.,;:!()[]{}")
+    if re.fullmatch(r"[A-Za-z0-9._]{1,30}", username):
+        return username
+    return None
 
 def normalize_text_list(text: str) -> str:
     """

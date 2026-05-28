@@ -12,6 +12,8 @@ from app.utils import (
     generate_edit_token,
     generate_whatsapp_link,
     normalize_instagram_link,
+    normalize_instagram_handle,
+    format_instagram_label,
     clean_phone_number,
     normalize_text_list,
     validate_url
@@ -57,6 +59,7 @@ templates.env.cache = {}  # deshabilitar cache para evitar bug con globals
 templates.env.globals["extract_youtube_id"] = extract_youtube_id
 templates.env.globals["generate_whatsapp_link"] = generate_whatsapp_link
 templates.env.globals["normalize_instagram_link"] = normalize_instagram_link
+templates.env.globals["format_instagram_label"] = format_instagram_label
 
 # ── DIRECTORIO ────────────────────────────────────────────────────────────────
 
@@ -118,7 +121,7 @@ async def create_profile(
         youtube_links=youtube_links.strip() if youtube_links else None,
         spotify_link=spotify_link.strip() if spotify_link else None,
         photo_url=photo_url.strip() if photo_url else None,
-        instagram_link=instagram_link.strip() if instagram_link else None,
+        instagram_link=normalize_instagram_handle(instagram_link),
     )
     session.add(new_profile)
     session.commit()
@@ -176,7 +179,7 @@ async def update_profile(
         profile.phone = clean_phone_number(phone)
         profile.youtube_links = youtube_links.strip() if youtube_links else None
         profile.spotify_link = spotify_link.strip() if spotify_link else None
-        profile.instagram_link = instagram_link.strip() if instagram_link else None
+        profile.instagram_link = normalize_instagram_handle(instagram_link)
         session.add(profile)
 
     session.commit()

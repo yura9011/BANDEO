@@ -100,11 +100,11 @@
                 <span class="text-sm opacity-60">↗</span>
             </a>
             {% endif %}
-            {% if profile.instagram_link %}
-            <a href="{{ normalize_instagram_link(profile.instagram_link) }}" target="_blank"
-               class="contact-secondary flex items-center justify-between w-full px-5 py-4 rounded-lg transition-colors">
-                <span class="font-medium">Instagram</span>
-                <span class="text-sm opacity-50 truncate max-w-[180px] sm:max-w-[300px]">{{ profile.instagram_link }}</span>
+            {% if profile.instagram_link and normalize_instagram_link(profile.instagram_link) %}
+            <a href="{{ normalize_instagram_link(profile.instagram_link) }}" target="_blank" rel="noopener noreferrer"
+               class="contact-secondary flex items-center justify-between gap-4 w-full px-5 py-4 rounded-lg transition-colors">
+                <span class="font-medium shrink-0">Instagram</span>
+                <span class="text-sm opacity-50 truncate text-right min-w-0">{{ format_instagram_label(profile.instagram_link) }}</span>
             </a>
             {% endif %}
             {% if profile.spotify_link %}

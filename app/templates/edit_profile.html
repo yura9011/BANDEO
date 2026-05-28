@@ -74,7 +74,7 @@
 
             <div>
                 <label>Instagram (opcional)</label>
-                <input type="text" name="instagram_link" value="{{ profile.instagram_link or '' }}" class="field">
+                <input type="text" name="instagram_link" value="{{ format_instagram_label(profile.instagram_link) if profile.instagram_link else '' }}" maxlength="120" class="field">
             </div>
 
             <details class="text-sm" style="color:var(--muted)">
