@@ -353,6 +353,8 @@ async def crear_fecha(
     city: str = Form(...),
     price: Optional[str] = Form(None),
     details: Optional[str] = Form(None),
+    instagram_link: Optional[str] = Form(None),
+    flyer_url: Optional[str] = Form(None),
     session: Session = Depends(get_session)
 ):
     user = session.exec(select(User).where(User.edit_token == token)).first()
@@ -374,6 +376,8 @@ async def crear_fecha(
         city=city.strip(),
         price=price.strip() if price else None,
         details=details.strip() if details else None,
+        instagram_link=instagram_link.strip() if instagram_link else None,
+        flyer_url=flyer_url.strip() if flyer_url else None,
     )
     session.add(event)
     session.flush()
@@ -409,19 +413,22 @@ async def migrate_route(
         with engine.connect() as conn:
             if db_type == "postgresql":
                 conn.execute(sa_text("ALTER TABLE profile ADD COLUMN IF NOT EXISTS photo_url TEXT;"))
+                conn.execute(sa_text("ALTER TABLE event ADD COLUMN IF NOT EXISTS instagram_link TEXT;"))
+                conn.execute(sa_text("ALTER TABLE event ADD COLUMN IF NOT EXISTS flyer_url TEXT;"))
                 conn.execute(sa_text("UPDATE \"user\" SET status = 'approved' WHERE status = 'pending';"))
                 conn.execute(sa_text("UPDATE post SET status = 'approved' WHERE status = 'pending';"))
                 conn.execute(sa_text("UPDATE event SET status = 'approved' WHERE status = 'pending';"))
             else:
-                try:
-                    conn.execute(sa_text("ALTER TABLE profile ADD COLUMN photo_url TEXT;"))
-                except Exception:
-                    pass
+                for col in ["photo_url", "instagram_link", "flyer_url"]:
+                    try:
+                        conn.execute(sa_text(f"ALTER TABLE profile ADD COLUMN {col} TEXT;"))
+                    except Exception:
+                        pass
                 conn.execute(sa_text("UPDATE \"user\" SET status = 'approved' WHERE status = 'pending';"))
                 conn.execute(sa_text("UPDATE post SET status = 'approved' WHERE status = 'pending';"))
                 conn.execute(sa_text("UPDATE event SET status = 'approved' WHERE status = 'pending';"))
             conn.commit()
-        results.append("OK: columna photo_url + status actualizados")
+        results.append("OK: columnas instagram_link, flyer_url, photo_url + status actualizados")
     except Exception as e:
         results.append(f"ERROR: {e}")
 

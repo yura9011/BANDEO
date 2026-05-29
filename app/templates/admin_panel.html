@@ -191,6 +191,12 @@
                     {% if event.details %}
                     <p class="text-xs text-gray-400 mt-1">{{ event.details }}</p>
                     {% endif %}
+                    {% if event.instagram_link %}
+                    <p class="text-xs text-gray-500 mt-1">Instagram: <a href="{{ event.instagram_link }}" target="_blank" class="underline">{{ event.instagram_link }}</a></p>
+                    {% endif %}
+                    {% if event.flyer_url %}
+                    <p class="text-xs text-gray-500 mt-1">Flyer: <a href="{{ event.flyer_url }}" target="_blank" class="underline">{{ event.flyer_url }}</a></p>
+                    {% endif %}
                 </div>
                 <div class="flex gap-2 shrink-0">
                     <form method="post" action="/admin/approve/event/{{ event.id }}">

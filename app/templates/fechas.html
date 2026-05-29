@@ -171,6 +171,12 @@
                             {% if ev.price %}{{ ev.price }}{% endif %}
                         </p>
                         {% endif %}
+                        {% if ev.instagram_link or ev.flyer_url %}
+                        <p class="text-xs mt-0.5 flex gap-2" style="color:var(--muted)">
+                            {% if ev.flyer_url %}🖼️ <a href="{{ ev.flyer_url }}" target="_blank" onclick="event.stopPropagation()" class="underline">Flyer</a>{% endif %}
+                            {% if ev.instagram_link %}📷 <a href="{{ ev.instagram_link }}" target="_blank" onclick="event.stopPropagation()" class="underline">Instagram</a>{% endif %}
+                        </p>
+                        {% endif %}
                     </div>
                     {% endfor %}
                     {% endfor %}

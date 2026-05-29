@@ -51,6 +51,8 @@ class Event(SQLModel, table=True):
     city: str
     price: Optional[str] = None
     details: Optional[str] = None
+    instagram_link: Optional[str] = None
+    flyer_url: Optional[str] = None
     status: str = Field(default="approved")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     user: User = Relationship(back_populates="events")
