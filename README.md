@@ -1,64 +1,59 @@
 # Bandeo
 
-Directorio de músicos y bandas. Publicás tu perfil, te encontramos.
+Bandeo es un directorio público para músicos y bandas. Permite publicar un perfil simple, mostrar instrumentos, géneros, ciudad, enlaces y medios, y facilitar el contacto directo a través de plataformas externas como WhatsApp, Instagram, Spotify y YouTube.
 
-## Variables de entorno
+El producto está pensado para reducir fricción: cualquier persona puede explorar perfiles sin crear una cuenta, y cada músico o banda puede administrar su publicación mediante un enlace privado de edición.
 
-Crear un archivo `.env` en la raiz del proyecto:
+## Alcance del producto
 
-```
-ADMIN_USER=
-ADMIN_PASSWORD=
-ADMIN_SECRET=
-```
+Bandeo incluye:
 
-## Correr localmente
+- Directorio público de perfiles de músicos y bandas.
+- Creación de perfiles sin registro tradicional.
+- Edición de perfiles mediante enlace privado.
+- Página pública de perfil con bio, ubicación, instrumentos, géneros, medios y contacto.
+- Tablón de novedades para publicaciones breves de bandas.
+- Calendario de fechas y presentaciones.
+- Panel de administración para revisión operativa.
+- Historial recuperable de cambios relevantes.
 
-```bash
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload
-```
+La aplicación no incluye chat interno, sistema de puntuación ni autenticación completa de usuarios. El contacto ocurre fuera de Bandeo, mediante los enlaces publicados por cada perfil.
 
-Abre en `http://127.0.0.1:8000`
+## Stack técnico
 
-## Cargar datos de prueba
+- Python
+- FastAPI
+- SQLModel
+- PostgreSQL
+- Jinja2
+- Tailwind CSS
 
-```bash
-python seed_db.py
-python seed_events.py
-```
+## Estructura principal
 
-## Estructura
-
-```
+```text
 app/
-  main.py          rutas
-  models/user.py   User, Profile, Post, Event
-  database.py      engine y sesion
-  utils.py         geocoding, tokens, links
-  templates/       HTML (Jinja2 + Tailwind)
-  static/          assets
-seed_db.py         perfiles de prueba
-seed_events.py     eventos de prueba
-requirements.txt
+  main.py              Rutas y handlers de la aplicación
+  database.py          Configuración de base de datos y sesiones
+  audit.py             Historial recuperable de cambios
+  models/user.py       Modelos de datos
+  templates/           Vistas HTML renderizadas en servidor
+  static/              Recursos públicos
+api/
+  index.py             Entry point serverless
+requirements.txt       Dependencias de Python
+vercel.json            Configuración de despliegue
 ```
 
-## Paginas
+## Configuración y datos
 
-| URL | Descripcion |
-|-----|-------------|
-| / | Directorio de perfiles |
-| /create | Crear perfil |
-| /edit/{token} | Editar perfil |
-| /profile/{id} | Ver perfil publico |
-| /bandas | Tablon de novedades |
-| /bandas/nuevo | Publicar novedad |
-| /fechas | Calendario de fechas |
-| /fechas/nueva | Agregar fecha |
+La configuración de ejecución se administra mediante variables de entorno. Este repositorio no debe contener valores reales, credenciales, archivos `.env`, bases de datos, logs, caches, datos de producción ni notas operativas privadas.
 
-## Stack
+El repositorio debe representar el código de la aplicación y su documentación pública. La información local de trabajo, instrucciones para agentes, detalles privados de despliegue y datos runtime quedan fuera del control de versiones.
 
-- Python / FastAPI
-- SQLite / SQLModel
-- Jinja2 / Tailwind CSS
-- Geocoding via OpenStreetMap Nominatim
+## Seguridad de datos
+
+Bandeo registra un historial recuperable para las operaciones principales de escritura. El historial guarda snapshots antes y después de ediciones, creaciones, acciones de moderación y eliminaciones. Los tokens privados de edición no se guardan en esos snapshots.
+
+## Estado
+
+Bandeo es un MVP activo. El foco actual es consolidar el directorio público, preservar correctamente los datos publicados por usuarios y mejorar el flujo operativo de administración sin agregar complejidad innecesaria al producto.

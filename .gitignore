@@ -1,24 +1,37 @@
-# Base de datos
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime data
 *.db
+*.sqlite
+*.sqlite3
+logs/
 
 # Python
-*.pyc
 __pycache__/
-.env
-.env.local
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
 
-# OS
+# Build and cache artifacts
+.cache/
+dist/
+build/
+
+# OS and editors
 .DS_Store
 Thumbs.db
-
-# IDEs
 .vscode/
 .idea/
 *.swp
 
-# GSD (framework interno, no parte del proyecto)
+# Local planning and agent context
 .gsd/
 .planning/
-
-# Logs
-*.log
+AGENTS.md
+CLAUDE.md
