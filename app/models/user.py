@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
 from datetime import datetime, date
+from sqlalchemy import Column, Text
 
 class UserBase(SQLModel):
     role: str  # "MUSICO" o "BANDA"
@@ -53,3 +54,15 @@ class Event(SQLModel, table=True):
     status: str = Field(default="approved")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     user: User = Relationship(back_populates="events")
+
+
+class AuditLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    action: str = Field(index=True)
+    entity_type: str = Field(index=True)
+    entity_id: Optional[int] = Field(default=None, index=True)
+    actor_type: str = Field(default="system", index=True)
+    actor_user_id: Optional[int] = Field(default=None, index=True)
+    before_data: Optional[str] = Field(default=None, sa_column=Column(Text))
+    after_data: Optional[str] = Field(default=None, sa_column=Column(Text))

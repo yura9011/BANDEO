@@ -155,4 +155,22 @@ Definir como se muestra la foto en el grid de perfiles y en el detalle.
 
 ---
 
-*Ultima actualizacion: 2026-05-14*
+## [DECISION-011] Auditoria de cambios recuperable
+
+**Fecha**: 2026-05-28
+**Estado**: Accepted
+
+### Contexto
+Un cambio de presentacion puede ocultar o transformar datos cargados por usuarios si no existe historial. Necesitamos poder saber que habia antes de una edicion, borrado o normalizacion.
+
+### Decision
+Registrar snapshots before/after de todos los writes principales en una tabla `AuditLog`. Los snapshots deben ser recuperables y no deben incluir secretos como `edit_token`.
+
+### Consecuencias
+- Se puede investigar que cambio y cuando desde el admin.
+- Restaurar desde UI queda fuera de esta decision inicial.
+- La normalizacion de campos debe preservar texto libre cuando no sea peligroso.
+
+---
+
+*Ultima actualizacion: 2026-05-28*

@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 from sqlmodel import create_engine, SQLModel, Session
-from app.models.user import User, Profile, Post, Event
+from app.models.user import User, Profile, Post, Event, AuditLog
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./bandeo.db")
 

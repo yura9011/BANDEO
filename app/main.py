@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select, func
 from app.database import create_db_and_tables, get_session, engine, DATABASE_URL
-from app.models.user import User, Profile, Post, Event
+from app.models.user import User, Profile, Post, Event, AuditLog
 from app.utils import (
     get_coordinates,
     calculate_distance,
@@ -17,6 +17,12 @@ from app.utils import (
     clean_phone_number,
     normalize_text_list,
     validate_url
+)
+from app.audit import (
+    add_audit_log,
+    audit_display_rows,
+    snapshot_entity,
+    snapshot_user_profile,
 )
 from typing import Optional
 import uvicorn
@@ -124,6 +130,16 @@ async def create_profile(
         instagram_link=clean_instagram_input(instagram_link),
     )
     session.add(new_profile)
+    session.flush()
+    add_audit_log(
+        session,
+        action="create",
+        entity_type="profile",
+        entity_id=new_profile.id,
+        actor_type="owner",
+        actor_user_id=new_user.id,
+        after=snapshot_user_profile(new_user, new_profile),
+    )
     session.commit()
 
     return templates.TemplateResponse("profile_created.html", {
@@ -164,10 +180,12 @@ async def update_profile(
     if spotify_link and not validate_url(spotify_link):
         raise HTTPException(status_code=400, detail="URL de Spotify inválida")
 
+    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    before_profile = snapshot_user_profile(user, profile) if profile else None
+
     user.display_name = display_name.strip()
     session.add(user)
 
-    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if profile:
         lat, lng = await get_coordinates(city)
         profile.city = city.strip()
@@ -181,6 +199,17 @@ async def update_profile(
         profile.spotify_link = spotify_link.strip() if spotify_link else None
         profile.instagram_link = clean_instagram_input(instagram_link)
         session.add(profile)
+        session.flush()
+        add_audit_log(
+            session,
+            action="update",
+            entity_type="profile",
+            entity_id=profile.id,
+            actor_type="owner",
+            actor_user_id=user.id,
+            before=before_profile,
+            after=snapshot_user_profile(user, profile),
+        )
 
     session.commit()
     return templates.TemplateResponse("profile_updated.html", {
@@ -227,7 +256,18 @@ async def crear_post(request: Request, token: str = Form(...), content: str = Fo
     content = content.strip()
     if not content or len(content) > 500:
         raise HTTPException(status_code=400, detail="Contenido inválido")
-    session.add(Post(user_id=user.id, content=content))
+    post = Post(user_id=user.id, content=content)
+    session.add(post)
+    session.flush()
+    add_audit_log(
+        session,
+        action="create",
+        entity_type="post",
+        entity_id=post.id,
+        actor_type="owner",
+        actor_user_id=user.id,
+        after=snapshot_entity(session, "post", post),
+    )
     session.commit()
     return templates.TemplateResponse("bandas_post_creado.html", {"request": request, "user": user})
 
@@ -336,6 +376,16 @@ async def crear_fecha(
         details=details.strip() if details else None,
     )
     session.add(event)
+    session.flush()
+    add_audit_log(
+        session,
+        action="create",
+        entity_type="event",
+        entity_id=event.id,
+        actor_type="owner",
+        actor_user_id=user.id,
+        after=snapshot_entity(session, "event", event),
+    )
     session.commit()
 
     return templates.TemplateResponse("fechas_creada.html", {
@@ -459,6 +509,23 @@ async def admin_panel(
         "approved_users_list": approved_user_list,
     })
 
+@app.get("/admin/audit", response_class=HTMLResponse)
+async def admin_audit(
+    request: Request,
+    admin_token: Optional[str] = Cookie(None),
+    session: Session = Depends(get_session)
+):
+    if admin_token != ADMIN_SECRET:
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    logs = session.exec(
+        select(AuditLog).order_by(AuditLog.created_at.desc()).limit(100)
+    ).all()
+    return templates.TemplateResponse("admin_audit.html", {
+        "request": request,
+        "audit_rows": audit_display_rows(logs),
+    })
+
 @app.post("/admin/approve/{entity}/{id}", response_class=HTMLResponse)
 async def admin_approve(
     entity: str, id: int,
@@ -478,14 +545,26 @@ async def admin_approve(
         raise HTTPException(status_code=400)
 
     if obj:
+        before = snapshot_entity(session, entity, obj)
         obj.status = "approved"
         session.add(obj)
+        session.flush()
+        add_audit_log(
+            session,
+            action="approve",
+            entity_type=entity,
+            entity_id=id,
+            actor_type="admin",
+            before=before,
+            after=snapshot_entity(session, entity, obj),
+        )
         session.commit()
 
     return RedirectResponse(url="/admin", status_code=303)
 
 @app.post("/admin/delete/{entity}/{id}", response_class=HTMLResponse)
 async def admin_delete(
+    request: Request,
     entity: str, id: int,
     admin_token: Optional[str] = Cookie(None),
     session: Session = Depends(get_session)
@@ -498,6 +577,7 @@ async def admin_delete(
         if entity == "user":
             obj = session.get(User, id)
             if obj:
+                before = snapshot_entity(session, entity, obj)
                 profile = session.exec(select(Profile).where(Profile.user_id == id)).first()
                 if profile: session.delete(profile)
                 posts = session.exec(select(Post).where(Post.user_id == id)).all()
@@ -505,12 +585,40 @@ async def admin_delete(
                 events = session.exec(select(Event).where(Event.user_id == id)).all()
                 for e in events: session.delete(e)
                 session.delete(obj)
+                add_audit_log(
+                    session,
+                    action="delete",
+                    entity_type=entity,
+                    entity_id=id,
+                    actor_type="admin",
+                    before=before,
+                )
         elif entity == "post":
             obj = session.get(Post, id)
-            if obj: session.delete(obj)
+            if obj:
+                before = snapshot_entity(session, entity, obj)
+                session.delete(obj)
+                add_audit_log(
+                    session,
+                    action="delete",
+                    entity_type=entity,
+                    entity_id=id,
+                    actor_type="admin",
+                    before=before,
+                )
         elif entity == "event":
             obj = session.get(Event, id)
-            if obj: session.delete(obj)
+            if obj:
+                before = snapshot_entity(session, entity, obj)
+                session.delete(obj)
+                add_audit_log(
+                    session,
+                    action="delete",
+                    entity_type=entity,
+                    entity_id=id,
+                    actor_type="admin",
+                    before=before,
+                )
         else:
             error = f"Entidad invalida: {entity}"
         session.commit()
@@ -543,8 +651,19 @@ async def admin_reject(
         raise HTTPException(status_code=400)
 
     if obj:
+        before = snapshot_entity(session, entity, obj)
         obj.status = "rejected"
         session.add(obj)
+        session.flush()
+        add_audit_log(
+            session,
+            action="reject",
+            entity_type=entity,
+            entity_id=id,
+            actor_type="admin",
+            before=before,
+            after=snapshot_entity(session, entity, obj),
+        )
         session.commit()
 
     return RedirectResponse(url="/admin", status_code=303)

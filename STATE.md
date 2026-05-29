@@ -1,6 +1,6 @@
 # Estado del Proyecto — BANDEO
 
-> Última actualización: 2026-05-14
+> Última actualización: 2026-05-28
 
 ## Estado actual
 
@@ -27,6 +27,7 @@
 - ✅ Tres temas visuales (claro, oscuro, alto contraste)
 - ✅ Perfiles visibles inmediatamente (sin moderación manual)
 - ✅ Admin panel presente pero inactivo para aprobaciones
+- ✅ Historial de cambios recuperable para writes principales (`/admin/audit`)
 
 ## Qué falta para el MVP real
 
@@ -47,6 +48,7 @@
 - Moderación desactivada → perfiles, posts y eventos visibles al instante
 - Calendario y bandas → adicionales existentes, no core del MVP pero navegables
 - Sin dominio propio → `*.vercel.app`
+- Auditoría de cambios → snapshots before/after sin `edit_token`
 
 ## Variables de entorno requeridas
 
