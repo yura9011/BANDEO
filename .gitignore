@@ -35,3 +35,8 @@ Thumbs.db
 .planning/
 AGENTS.md
 CLAUDE.md
+# Internal project documentation
+STATE.md
+SPEC.md
+ROADMAP.md
+DECISIONS.md
